@@ -118,6 +118,8 @@ Now we're ready to load in data. The data frame will be our basic way of interac
 
 However, we first need to make sure that R is looking in the right place. When you opened up your project, Rstudio automagically took you to the directory for that project. But because we keep lessons in a separate directory, we need to 
 
+Blah blah 
+
 ```{r load_data}
 ## Load in the data
 load("college.Rdata")
@@ -158,7 +160,7 @@ We can look at the whole dataset using View.
 ## What does this data look like? Look at the first few rows, first few variables
 sc
 
-#View(sc)
+View(sc)
 ```
 
 *Filter, Select, Arrange*
@@ -179,6 +181,8 @@ Let's grab just the data for Vanderbilt, then look only at the average test scor
 ## Where are we?
 sc%>%filter(instnm=="Vanderbilt University")
 
+sc%>%filter(instnm=="Harvard University")
+
 sc%>%filter(instnm=="Vanderbilt University")%>%select(instnm,adm_rate,sat_avg )
 
 ## Just colleges with low admit rates: show admit rate and sat scores, arrange in a pleasing way
@@ -189,6 +193,9 @@ sc%>%filter(adm_rate<.1)%>%select(instnm,adm_rate,sat_avg)%>%arrange(-sat_avg)
   
 ## New cut
 sc%>%filter(adm_rate>.3)%>%select(instnm,sat_avg,md_earn_wne_p6,stabbr)%>%arrange(stabbr,-sat_avg)%>%print(n=100)
+
+sc%>%filter(instnm=="New York University")%>%select(debt_mdn,md_earn_wne_p6)
+
 ```
 
 *Quick Exercise*
@@ -217,14 +224,22 @@ sc%>%filter(adm_rate>.3)%>%summarize(mean_debt=mean(debt_mdn,na.rm=TRUE))
 
 *Quick Exercise* Calculate average earnings for schools where SAT>1200
 
+```{r}
+sc%>%filter(sat_avg>1200)%>%summarize(mean_earnings=mean(md_earn_wne_p6,na.rm=TRUE))
+```
+
+
 *Grouping Data*
 Another powerful tool is being able to calculate characteristics for various groups. For example, what are the average earnings for the three different types of colleges (public, private non-profit, private for-profit) in the dataset?
 
 ```{r grouping}
-
-sc%>%group_by(control)%>%summarize(mean_earnings=mean(md_earn_wne_p6,na.rm=TRUE))
- 
-sc%>%group_by(control)%>%summarize(mean_debt=mean(debt_mdn,na.rm=TRUE))
+# 
+# sc%>%group_by(control)
+# %>%
+#   summarize(mean_earnings=mean(md_earn_wne_p6))
+# 
+# sc%>%group_by(control)%>%
+#   summarize(mean_debt=mean(debt_mdn))
 
 ```
 
