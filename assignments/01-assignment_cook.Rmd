@@ -13,14 +13,25 @@ hello, world
 # # What is the mean cost of attendance?
 sc%>%summarize(mean_cost=mean(costt4_a,na.rm=TRUE))
 
-# # Scatterplot of SAT avg and cost of attendance
-gg<-ggplot(data=sc,aes(x=adm_rate,y=md_earn_ne_p6))
+# # Scatterplot of admission rate and average earnings
+gg<-ggplot(data=sc,aes(x=adm_rate,y=md_earn_wne_p6))
 gg<-gg+geom_point()
 gg
 ```
 
 ```{r}
+# # What is the average earnings for individuals at the most selective colleges?
+sc%>%filter(adm_rate<.1)%>%summarize(md_earn_wne_p6=mean(md_earn_wne_p6,na.rm=TRUE))
 
+# # What's the average earnings for individuals at the least selective colleges?
+sc%>%filter(adm_rate>.3)%>%summarize(md_earn_wne_p6=mean(md_earn_wne_p6,na.rm=TRUE))
+```
+```{r}
+# # Size of most selective schools
+sc%>%filter(adm_rate<.1)%>%summarize(ugds=mean(ugds,na.rm=TRUE))
+
+# # Size of least selective schools
+sc%>%filter(adm_rate>.3)%>%summarize(ugds=mean(ugds,na.rm=TRUE))
 ```
 
 
