@@ -1,0 +1,27 @@
+---
+title: "01-assignments_cook"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+hello, world
+
+
+```{r}
+# # What is the mean cost of attendance?
+sc%>%summarize(mean_cost=mean(costt4_a,na.rm=TRUE))
+
+# # Scatterplot of SAT avg and cost of attendance
+gg<-ggplot(data=sc,aes(x=adm_rate,y=md_earn_ne_p6))
+gg<-gg+geom_point()
+gg
+```
+
+```{r}
+
+```
+
+
+##
