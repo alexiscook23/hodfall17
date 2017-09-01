@@ -33,6 +33,25 @@ sc%>%filter(adm_rate<.1)%>%summarize(ugds=mean(ugds,na.rm=TRUE))
 # # Size of least selective schools
 sc%>%filter(adm_rate>.3)%>%summarize(ugds=mean(ugds,na.rm=TRUE))
 ```
+```{r}
+# # Relationship between cost and debt
+gg<-ggplot(data=sc,aes(x=costt4_a,y=debt_mdn))
+gg<-gg+geom_point()
+gg<-gg+geom_smooth()
+gg
+```
+It seems there's a strong correlation between lower cost and lower debt until the cost of admission reaches about $25,000, at which point there is almost no correlation between cost and debt. This actually doesn't surprise me because many schools with high costs also have extensive financial aid packages. Additionally, students applying to very expensive schools are often much wealthier than those going to school with a tuition less than $25,000, so they would have less debt coming out.
+
+```{r}
+gg<-ggplot(data=sc,aes(costt4_a))
+gg<-gg+geom_density()
+gg
+```
+```{r}
+gg<-ggplot(data=sc,aes(debt_mdn))
+gg<-gg+geom_density()
+gg
+```
 
 
 ##
