@@ -1,0 +1,82 @@
+```{r  include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(plotly)
+library(gridExtra)
+library(ModelMetrics)
+```
+
+```{r data}
+load("pd.Rdata")
+
+pd
+View("pd.Rdata")
+```
+
+```{r explain_date}
+
+## Full explanation of data
+load("pd_lab_explain.Rdata")
+
+lab_explain
+
+View(lab_explain)
+View(pd)
+#or use View
+#View(lab_explain)
+
+pd%>%summarize(mean_retail=mean(retail,na.rm=TRUE))
+
+```
+
+```{r condtl_mean_single}
+##Condtional Average across a single variable
+
+## Create a variable for quartiles of median household income
+pd<-pd%>%mutate(median_hh_inc=ntile(median_hh_inc,4))
+
+table(pd$median_hh_inc)
+
+pd<-pd%>%group_by(median_hh_inc)%>% ## Group by predictor
+  ##Calculate mean at each level of predictor
+  mutate(pred_retail_hh=mean(retail))%>% 
+  ## Ungroup
+  ungroup()%>% 
+  #Rank by prediction, with ties sorted randomly
+  mutate(pred_retail_hh_rank=rank(pred_retail_hh,ties.method="random"))
+
+pd%>%group_by(median_hh_inc)%>% ## Group by predictor
+  ##Calculate mean at each level of predictor
+  summarize(pred_retail_hh=mean(retail))
+```
+
+##Make prediction: retail by quartile of median hh income
+````
+pd<-pd%>%group_by(median_hh_inc)%>% ## Grouping at multiple levels
+  mutate(pred_retail_hh=mean(retail))%>%
+  ungroup()%>%
+  mutate(pred_retail_hh_rank=rank(pred_retail_hh_rank,ties.method="random"))
+````
+
+
+```{rmse unconditional}
+rmse_uncond_mean<-rmse(pd$retail,pd$pred_retail)
+rmse_uncond_mean
+```
+
+```{rsme conditional}
+rmse_cond_mean_one<-rmse(pd$retail,pd$pred_retail_hh)
+rmse_cond_mean_one
+```
+
+```{r condtl_mean_single}
+gg<-ggplot(data=pd,aes(x=retail,y=median_hh_inc,color="Actual"))
+gg<-gg+geom_point(alpha=.5,size=.5)
+gg<-gg+geom_point(aes(x=retail,y=median_hh_inc,color="Predicted:Conditional Mean, 1 var"))
+gg<-gg+ scale_color_manual("Type",values=c("Predicted:Conditional Mean, 1 var"="red","Actual"="black"))
+gg<-gg+theme(legend.position="bottom")
+gg<-gg+xlab("Gross Retail")+ylab("Median HH Income")
+gg
+```
+
+
