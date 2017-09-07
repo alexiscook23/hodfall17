@@ -1,0 +1,39 @@
+In Class Work: Conditional Means
+---------------------------------
+
+For today's class, I'd like for you to continue using the county-level dataset. Today, instead of predicting per capita income, use the variables in the dataset to predict retail sales. Here are some (but not all!) of the things that you'll need to do along the way:
+
+* Open up the dataset, `load("pd.RData"")`
+```{r}
+library(tidyverse)
+library(ModelMetrics)
+load("pd.Rdata")
+```
+
+
+* Calculate the mean of the outcome variable of retail sales: 
+```{r}
+pd%>%summarize(mean_retail=mean(retail_percap,na.rm=TRUE))
+```
+
+
+
+
+* Create new variables that indicate the quantiles of another variable, using `ntile`.
+
+I'm going to use home ownership rate `homeown_rate` to predict retail sales per capita.
+
+The first step is to "bin" the data into four groups based on home ownership rate.
+```{r}
+pd<-pd%>%mutate(home_own_level=ntile(homeow_rate,4))
+table(pd$)
+```
+
+
+* Generate some tables of the conditional mean of the outcome variable by levels of the predictor variable. (hint: `group_by`, then `summarize`).
+
+* Create predictions for each county based on conditional means within each grouping of the predictor variable. 
+
+* Generate summary measures of the error terms: the difference between actual retail sales and your predicted retail sales, using `rmse`.
+
+* You should also create some graphics. 

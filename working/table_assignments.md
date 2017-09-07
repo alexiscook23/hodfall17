@@ -38,36 +38,68 @@ class["index"]<-seq(1:dim(class)[1])
 
 class<-class%>%mutate(table=cut(index,6,(1:6)))
 
+class$rmse<-NA
+
 print(select(class,first_name,last_name,table),n=100)
 ```
 
-    ## # A tibble: 20 × 3
+    ## # A tibble: 19 × 3
     ##    first_name  last_name  table
     ##         <chr>      <chr> <fctr>
-    ## 1      Claire    Fogarty      1
-    ## 2     William   Sullivan      1
-    ## 3         Ben     Scheer      1
-    ## 4       Ethan      Polan      1
-    ## 5      Brenda         Lu      2
-    ## 6       Henry Livingston      2
-    ## 7       James  Michaelis      2
-    ## 8        Jack     Cramer      3
-    ## 9        Siqi       Chen      3
-    ## 10      Arjun       Shah      3
-    ## 11      Raven       Delk      4
-    ## 12      Susan       Cobb      4
-    ## 13       Cole      Smith      4
+    ## 1       Susan       Cobb      1
+    ## 2      Claire    Fogarty      1
+    ## 3        Cole      Smith      1
+    ## 4        Jack     Cramer      1
+    ## 5      Alexis       Cook      2
+    ## 6      Rachel      Anand      2
+    ## 7        Siqi       Chen      2
+    ## 8       Sunny        Cao      3
+    ## 9       Raven       Delk      3
+    ## 10       C.J.       Pond      3
+    ## 11        Ben     Scheer      4
+    ## 12      Arjun       Shah      4
+    ## 13      Ethan      Polan      4
     ## 14     Connor       Kreb      5
-    ## 15     Alexis       Cook      5
-    ## 16      Jacob   Kosowsky      5
-    ## 17      Sunny        Cao      6
-    ## 18      Katie      Means      6
-    ## 19     Rachel      Anand      6
-    ## 20     Carter       Pond      6
+    ## 15    William   Sullivan      5
+    ## 16      Katie      Means      5
+    ## 17      James  Michaelis      6
+    ## 18      Henry Livingston      6
+    ## 19     Brenda         Lu      6
 
 ``` r
 names(class)
 ```
 
     ## [1] "last_name"  "first_name" "ghid"       "random"     "index"     
-    ## [6] "table"
+    ## [6] "table"      "rmse"
+
+Kaggle Style Results
+--------------------
+
+Bar Graph
+---------
+
+``` r
+add_result<-function(df,group_number,rmse){
+  df$rmse[df$table==group_number]<-rmse
+  df
+  }
+
+new_rmse<-10000
+
+class<-add_result(class,1,new_rmse)
+class<-add_result(class,2,new_rmse)
+class<-add_result(class,3,new_rmse)
+class<-add_result(class,4,new_rmse)
+class<-add_result(class,5,new_rmse)
+class<-add_result(class,6,new_rmse)
+
+class_summary<-class%>%group_by(table)%>%
+  summarize(current_rmse=mean(rmse))
+
+gg<-ggplot(class_summary,aes(x=table,y=current_rmse,fill=table))
+gg<-gg+geom_bar(stat="identity",position=position_dodge())
+gg
+```
+
+![](table_assignments_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-2-1.png)
