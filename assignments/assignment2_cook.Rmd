@@ -1,0 +1,56 @@
+Open everything up
+```{r}
+library(tidyverse)
+library(ModelMetrics)
+load("pd.Rdata")
+```
+
+1. Mean of the outcome of homeownership rates
+```{r}
+pd%>%summarize(mean_homeown_rate=mean(homeown_rate,na.rm=TRUE)) #take the pd data and pipe it to summarize the mean of the homeownership rate variable
+```
+
+2. Mean as a prediction: Create a new variable that consists of the mean of the outcome.
+```{r}
+pd<-pd%>%mutate(mean_homeown_rate=mean(homeown_rate,na.rm=TRUE)) #use pd data but overwrite it and mutate the mean homeownership rate to be a new variable (a predictor)
+```
+
+3. A summary measure of the errors for each observation---the difference between your prediction and the outcome. 
+```{r}
+rmse(pd$homeown_rate,pd$mean_homeown_rate) #use root mean squared error to find difference between actual and predicted values (square root of the sum of squared errors)
+# this means I'm an average of 3.54% off with every prediction
+```
+4. The mean of the outcome at 4 levels of a predictor variable (percent of persons below the poverty level).  
+```{r}
+pd<-pd%>%mutate(persons_below_poverty_level=ntile(persons_below_poverty,4))
+# This just shows that I have four groups with the same number of counties.
+table(pd$persons_below_poverty_level)
+
+pd<-pd%>%group_by(persons_below_poverty_level)%>% ## Group by predictor
+  ##Calculate the mean of homeownership rates at each level of my predictor, persons below the poverty rate to create a new predictive variable called pred_homeown_poverty
+  mutate(pred_homeown_poverty=mean(homeown_rate))%>% 
+  ## Ungroup
+  ungroup()%>% 
+  #Rank my new variable, with ties sorted randomly
+  mutate(pred_homeown_poverty_rank=rank(pred_homeown_poverty,ties.method="random"))
+```
+
+5. The conditional means as a prediction: for every county, use the conditional mean to provide a ''best guess'' as to that county's level of the outcome.  
+```{r}
+
+pd%>%select(county,homeown_rate,persons_below_poverty,persons_below_poverty_level,pred_homeown_poverty,pred_homeown_poverty_rank)
+#view each county's homeownership rate, their rate of persons below the poverty line, their rank of persons below the poverty (1-4), their predicted homeownership rate based on persons below the poverty line (the variable I created), and the rank of predicted homeownership rate based on poverty levels
+```
+
+6. RMSE as a measure of the error in my predictions.
+```{r}
+rmse(pd$homeown_rate,pd$pred_homeown_poverty) #use root mean squared error to find difference between actual homeownership rates and predicted homeownership rates based on persons below the poverty line (square root of the sum of squared errors)
+```
+This means we're an average of 7.64% off when we use persons below the poverty line as a predictor of homeownership rates (actually a worse predictor than just using the unconditional mean). The reason it's such a bad predictor is likely because the orginal data in pd for "persons below the poverty line" is oddly formatted where all counties have 1-4% persons below the poverty line
+
+7. Repeat with 3 other variables to attempt to get better results
+
+coll_grad_pc
+
+
+
