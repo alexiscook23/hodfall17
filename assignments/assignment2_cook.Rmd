@@ -49,8 +49,62 @@ rmse(pd$homeown_rate,pd$pred_homeown_poverty) #use root mean squared error to fi
 This means we're an average of 7.64% off when we use persons below the poverty line as a predictor of homeownership rates (actually a worse predictor than just using the unconditional mean). The reason it's such a bad predictor is likely because the orginal data in pd for "persons below the poverty line" is oddly formatted where all counties have 1-4% persons below the poverty line
 
 7. Repeat with 3 other variables to attempt to get better results
+a) percent of persons with bachelor's degree or higher
+```{r}
+pd<-pd%>%mutate(coll_grad_pc_level=ntile(coll_grad_pc,4))
+# This just shows that I have four groups with the same number of counties.
+table(pd$coll_grad_pc_level)
 
-coll_grad_pc
+pd<-pd%>%group_by(coll_grad_pc_level)%>% ## Group by predictor
+  ##Calculate the mean of homeownership rates at each level of my predictor, persons below the poverty rate to create a new predictive variable called pred_homeown_poverty
+  mutate(pred_homeown_coll=mean(homeown_rate))%>% 
+  ## Ungroup
+  ungroup()%>% 
+  #Rank my new variable, with ties sorted randomly
+  mutate(pred_homeown_coll_rank=rank(pred_homeown_coll,ties.method="random"))
 
 
+pd%>%select(county,homeown_rate,coll_grad_pc,coll_grad_pc_level,pred_homeown_coll,pred_homeown_coll_rank)
+#view each county's homeownership rate, their rate of persons with a college degree, their rank of persons with a degree (1-4), their predicted homeownership rate based on persons with a college degree (the variable I created), and the rank of predicted homeownership rate based on percent of population with a degree
+```
+```{r}
+rmse(pd$homeown_rate,pd$pred_homeown_coll) #use root mean squared error to find difference between actual homeownership rates and predicted homeownership rates based on persons below the poverty line (square root of the sum of squared errors)
+```
+The rmse between real homeownership rates and predicted ones, based on percent of population with a college degree, is 7.426. This means I'm an average of 7.4% off on homeownership rates. This is better than my rmse using persons below the poverty line, but it is still less accurate than the unconditional mean.
 
+b) predict homeownership rates using multiple variables: persons below the poverty rate and persons with a college degree
+```{r}
+pd<-pd%>%group_by(coll_grad_pc_level,persons_below_poverty_level)%>% ## Grouping at multiple levels
+  mutate(pred_homeown_coll_poverty=mean(homeown_rate))%>%
+  ungroup()%>%
+  mutate(pred_homeown_coll_poverty_rank=rank(pred_homeown_coll_poverty,ties.method="random"))
+
+pd%>%select(county,homeown_rate,coll_grad_pc,persons_below_poverty,pred_homeown_coll_poverty,pred_homeown_coll_poverty_rank)
+#view each county's homeownership rate, their rate of persons with a college degree, their rate of persons below the poverty line, their predicted homeownership rate based on persons with a college degree and persons below the poverty line (the variable I created), and the rank of predicted homeownership rate based on percent of population with a degree and percent of population in poverty
+
+rmse(pd$homeown_rate,pd$pred_homeown_coll_poverty) #use root mean squared error to find difference between actual homeownership rates and predicted homeownership rates based on persons below the poverty line and persons with a college degree (square root of the sum of squared errors)
+```
+The rmse of the conditional mean with multiple variables (persons in poverty and persons with a college degree) is 7.157. This is the best predictor yet, but only marginally.
+
+c) predict homeownership rates using the population per county in 2010
+```{r}
+pd<-pd%>%mutate(pop2010_level=ntile(pop2010,4))
+# This just shows that I have four groups with the same number of counties.
+table(pd$pop2010_level)
+
+pd<-pd%>%group_by(pop2010_level)%>% ## Group by predictor
+  ##Calculate the mean of homeownership rates at each level of my predictor, persons below the poverty rate to create a new predictive variable called pred_homeown_poverty
+  mutate(pred_homeown_pop2010=mean(homeown_rate))%>% 
+  ## Ungroup
+  ungroup()%>% 
+  #Rank my new variable, with ties sorted randomly
+  mutate(pred_homeown_pop2010_rank=rank(pred_homeown_pop2010,ties.method="random"))
+
+
+pd%>%select(county,homeown_rate,pop2010,pop2010_level,pred_homeown_pop2010,pred_homeown_pop2010_rank)
+#view each county's homeownership rate, their rate of persons with a college degree, their rank of persons with a degree (1-4), their predicted homeownership rate based on persons with a college degree (the variable I created), and the rank of predicted homeownership rate based on percent of population with a degree
+```
+```{r}
+rmse(pd$homeown_rate,pd$pred_homeown_pop2010) #use root mean squared error to find difference between actual homeownership rates and predicted homeownership rates based on persons below the poverty line (square root of the sum of squared errors)
+```
+The rmse between homeownership rates and predicted rates using the population in 2010 is 7.185. This is better than both persons below the povety line and persons with a college degree as individual predictors, but it is slightly less accurate than the multiple-variable predictor. 
