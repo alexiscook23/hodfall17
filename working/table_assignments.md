@@ -47,24 +47,24 @@ print(select(class,first_name,last_name,table),n=100)
     ##    first_name  last_name  table
     ##         <chr>      <chr> <fctr>
     ## 1       Susan       Cobb      1
-    ## 2      Claire    Fogarty      1
-    ## 3        Cole      Smith      1
-    ## 4        Jack     Cramer      1
-    ## 5      Alexis       Cook      2
-    ## 6      Rachel      Anand      2
-    ## 7        Siqi       Chen      2
-    ## 8       Sunny        Cao      3
-    ## 9       Raven       Delk      3
-    ## 10       C.J.       Pond      3
-    ## 11        Ben     Scheer      4
-    ## 12      Arjun       Shah      4
-    ## 13      Ethan      Polan      4
-    ## 14     Connor       Kreb      5
-    ## 15    William   Sullivan      5
-    ## 16      Katie      Means      5
-    ## 17      James  Michaelis      6
-    ## 18      Henry Livingston      6
-    ## 19     Brenda         Lu      6
+    ## 2       James  Michaelis      1
+    ## 3       Ethan      Polan      1
+    ## 4        Siqi       Chen      1
+    ## 5      Brenda         Lu      2
+    ## 6       Raven       Delk      2
+    ## 7     William   Sullivan      2
+    ## 8      Rachel      Anand      3
+    ## 9      Connor       Kreb      3
+    ## 10     Claire    Fogarty      3
+    ## 11      Henry Livingston      4
+    ## 12       Cole      Smith      4
+    ## 13        Ben     Scheer      4
+    ## 14       Jack     Cramer      5
+    ## 15       C.J.       Pond      5
+    ## 16      Arjun       Shah      5
+    ## 17      Sunny        Cao      6
+    ## 18      Katie      Means      6
+    ## 19     Alexis       Cook      6
 
 ``` r
 names(class)

@@ -1,3 +1,6 @@
+---
+output: github_document
+---
 #Presenting Data 1: Plotting Conditional Means {#plot_means}
 
 The idea when plotting conditional means is to show how the outcome, or variable of interest, varies as a function of predictors. 
@@ -69,7 +72,7 @@ gg<-gg+geom_density()
 gg
 
 ## Changing bandwidth-- not recommended, just showing you how. 
-gg<-gg+geom_density(bw=.2)
+gg<-gg+geom_density(bw=10)
 gg
 ```
 
@@ -120,6 +123,29 @@ gg
 
 *Quick Exercise: Create a bar plot showing average attrition by department instead of travel*
 
+
+```{r}
+
+at_sum<-at%>%
+  group_by(Department)%>%
+  summarize(attr_avg=mean(attrit))
+
+at_sum
+
+gg<-ggplot(at_sum,aes(x=fct_reorder(Department,attr_avg),y=attr_avg))
+
+gg<-gg+geom_bar(stat="identity")
+
+## Labeling
+gg<-gg+xlab("Department")+ylab("Yearly Attrition")
+##Print
+gg
+
+
+
+```
+
+
 A dot plot can be a good way of displaying conditional means as well. Many times dot plots are more easily understood if they are horizontal, so we'll use `coord_flip` to make it horizontal.
 
 ```{r}
@@ -130,7 +156,7 @@ at_sum<-at%>%
 
 at_sum
 ## Now a dot plot
-gg<-ggplot(at_sum,aes(x=reorder(BusinessTravel,attr_avg),y=attr_avg))
+gg<-ggplot(at_sum,aes(x=reorder(BusinessTravel,-attr_avg),y=attr_avg))
 gg<-gg+geom_point()
 gg<-gg+coord_flip()
 gg
@@ -153,7 +179,7 @@ at_sum<-at%>%
 at_sum
 
 ## PLot it using a bar plot
-gg<-ggplot(at_sum,aes(x=reorder(BusinessTravel,attr_avg),y=attr_avg,color=Gender))
+gg<-ggplot(at_sum,aes(x=fct_reorder(BusinessTravel,attr_avg),y=attr_avg,color=Gender))
 gg<-gg+geom_bar(stat="identity",aes(fill=Gender),position="dodge")
 gg
 
@@ -186,7 +212,7 @@ gg<-ggplot(at_sum,aes(x=reorder(BusinessTravel,attr_avg),
                       fill=Gender))
 ## Bar plot, with unstacked (dodge)
  gg<-gg+geom_bar(stat="identity",position="dodge")
-## Separate out by Marital Status 
+## Separate out by Marital Status
 gg<-gg+facet_wrap(~MaritalStatus)
 ## Change orientation to sideways
 gg<-gg+coord_flip()
@@ -248,6 +274,7 @@ at_sum$grouping<-as.factor(at_sum$grouping)
 
 at_sum%>%select(grouping,attr_avg)
 
+## Drop the groups with 0 or very low attrition. 
 at_sum<-at_sum%>%filter(attr_avg>.01)
 
 gg<-ggplot(at_sum,aes(x=fct_reorder(grouping,attr_avg),y=attr_avg))
@@ -266,7 +293,7 @@ gg
 
 The other solution is to use facets, or lots of little graphs, which show how the pattern varies across different groups. In this case, our groups will be defined by gender and work/life balance. 
 
-```{r}
+```{r, echo=FALSE, results='hide', warning=FALSE, message=FALSE}
 ## Using Facets
 
 at_sum<-at%>%
