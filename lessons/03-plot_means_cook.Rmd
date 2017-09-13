@@ -258,9 +258,11 @@ gg<-gg+scale_fill_manual(values =mypal )
 ## Print
 gg
 ```
+R already has a large palette of colors so it'll recognize what you say in quotes, but not all colors will work like that
+-the scale_fill_manual command is how you use the palette you just created (this time we named our palette "mypal," but it could have been anything)
 
 You can also use `RColorBrewer` which has a wide variety of palettes already built. Below I use the qualitative palette creatively named "Set1".
-
+-these are pre-buile palettes, as opposed to creating our own palette like we did above
 ```{r}
 ## Another way, using color brewer palettes: 
 gg<-gg+scale_fill_brewer(palette = "Set1")
@@ -285,6 +287,7 @@ at_sum<-at%>%
 
 at_sum
 
+#this table we just created is way too big, so we need another way to group
 ## One Solution: a new variable for every type of employee defined by travel, gender, marital status, and happiness with work/life
 
 at_sum$grouping<-paste0(at_sum$BusinessTravel,
@@ -294,7 +297,8 @@ at_sum$grouping<-paste0(at_sum$BusinessTravel,
                        at_sum$MaritalStatus,
                        ", Work/Life:",
                        at_sum$WorkLifeBalance)
-
+#line 293 means that we take the dataset at_sum and select the variable "grouping," which we just created and defined as the four variables we want
+#paste0 combines text separated by a comma (or space depending on default option)
 at_sum$grouping<-as.factor(at_sum$grouping)
 
 at_sum%>%select(grouping,attr_avg)
@@ -340,5 +344,6 @@ gg<-gg+ggtitle("Departure by Gender and Level of Work/Life Satisfaction")
 gg
 
 ```
+The issue is that both the macro barchart and the combo of multiple charts are fairly difficult to read and explain, so it's best to not use this many variables unless you have a compelling reason or a really clear relationship of the data that will show on a graphic
 
 *Sort of Quick Exercise: Try and Replicate one of the above plots using performance review, department, education field and overtime. *
