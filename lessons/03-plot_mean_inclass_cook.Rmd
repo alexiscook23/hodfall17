@@ -1,0 +1,172 @@
+In Class Work: Plotting Conditional Means
+----------------------------
+
+Today we're going to work again with attrition as our outcome. Your company would like to know which groups are most likely to leave this year. Your supervisor has asked you to wtrie a one-page memo, detailing how attrition varies as a function of different employee characteristics. Since your supervisor is a visual learner, the memo should include two graphics, with accompanying brief text. No R code should be visible in the memo, just graphics and normal text. Your supervisor has said that the following areas are of key interest as possible predictors of attrition.
+
+1. Commute distance
+2. Marital Status
+3. Gender
+4. Work/Life Balance
+5. Education level
+6. Salary
+
+
+```{r  include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(forcats)
+library(RColorBrewer)
+```
+
+```{r}
+at<-read_csv("https://community.watsonanalytics.com/wp-content/uploads/2015/03/WA_Fn-UseC_-HR-Employee-Attrition.csv")
+
+## Save for later
+save(at,file="at.Rdata")
+
+## Load the saved version (not necessary, just showing we can!)
+load("at.Rdata")
+View(at)
+```
+
+```{r}
+#so that I hide everything except graphics and actual text
+echo=FALSE 
+results='hide' 
+warning=FALSE 
+message=FALSE
+```
+
+```{r}
+## Crate a new variable named attrit and define it as 0
+at<-at%>%mutate(attrit=ifelse(Attrition=="Yes",1,0))
+
+table(at$Attrition)
+
+table(at$attrit)
+
+table(at$attrit,at$Attrition)
+
+```
+
+```{r}
+
+at_sum<-at%>%
+  group_by(DistanceFromHome)%>%
+  summarize(attr_avg=mean(attrit))
+
+at_sum
+
+```
+
+```{r distance from home}
+## Bar Plot with aesthetics: mean attrition as height, distance from home as cateogry
+gg<-ggplot(at_sum,aes(x=fct_reorder(as.factor(DistanceFromHome),attr_avg),y=attr_avg))
+## Use bar plot geometry and height of bars set by level observed in dataset
+gg<-gg+geom_bar(stat="Identity")
+#label
+gg<-gg+xlab("Distance From Home")+ylab("Yearly Attrition")
+## Print
+gg
+```
+
+```{r marital status}
+at_sum<-at%>%
+  group_by(MaritalStatus)%>%
+  summarize(attr_avg=mean(attrit))
+
+at_sum
+
+## ordered by level
+gg<-ggplot(at_sum,aes(x=fct_reorder(MaritalStatus,attr_avg),y=attr_avg))
+
+gg<-gg+geom_bar(stat="identity")
+
+## Labeling
+gg<-gg+xlab("Marital Status")+ylab("Yearly Attrition")
+##Print
+gg
+```
+
+```{r gender}
+at_sum<-at%>%
+  group_by(Gender)%>%
+  summarize(attr_avg=mean(attrit))
+
+at_sum
+
+## ordered by level
+gg<-ggplot(at_sum,aes(x=fct_reorder(Gender,attr_avg),y=attr_avg))
+
+gg<-gg+geom_bar(stat="identity")
+
+## Labeling
+gg<-gg+xlab("Gender")+ylab("Yearly Attrition")
+##Print
+gg
+```
+```{r work life balance}
+at_sum<-at%>%
+  group_by(WorkLifeBalance)%>%
+  summarize(attr_avg=mean(attrit))
+
+at_sum
+
+## ordered by level
+gg<-ggplot(at_sum,aes(x=fct_reorder(as.factor(WorkLifeBalance),attr_avg),y=attr_avg))
+
+gg<-gg+geom_bar(stat="identity")
+
+## Labeling
+gg<-gg+xlab("Work Life Balance")+ylab("Yearly Attrition")
+##Print
+gg
+```
+```{r education level}
+at_sum<-at%>%
+  group_by(Education)%>%
+  summarize(attr_avg=mean(attrit))
+
+at_sum
+
+## ordered by level
+gg<-ggplot(at_sum,aes(x=fct_reorder(as.factor(Education),attr_avg),y=attr_avg))
+
+gg<-gg+geom_bar(stat="identity")
+
+## Labeling
+gg<-gg+xlab("Education Level")+ylab("Yearly Attrition")
+##Print
+gg
+```
+```{r salary}
+at_sum<-at%>%
+  group_by(MonthlyIncome)%>%
+  summarize(attr_avg=mean(attrit))
+
+at_sum
+
+## ordered by level
+gg<-ggplot(at_sum,aes(x=fct_reorder(MonthlyIncome,attr_avg),y=attr_avg))
+
+gg<-gg+geom_bar(stat="identity")
+
+## Labeling
+gg<-gg+xlab("Salary")+ylab("Yearly Attrition")
+##Print
+gg
+```
+
+```{r}
+## Summarize attrition by travel AND gender
+at_sum<-at%>%
+  group_by(BusinessTravel,Gender)%>%
+  summarize(attr_avg=mean(attrit))
+
+## Get the results
+at_sum
+
+## Plot it using a bar plot
+gg<-ggplot(at_sum,aes(x=reorder(BusinessTravel,attr_avg),y=attr_avg,color=Gender))
+gg<-gg+geom_bar(stat="identity",aes(fill=Gender),position="dodge")
+gg
