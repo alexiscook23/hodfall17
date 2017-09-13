@@ -108,3 +108,8 @@ pd%>%select(county,homeown_rate,pop2010,pop2010_level,pred_homeown_pop2010,pred_
 rmse(pd$homeown_rate,pd$pred_homeown_pop2010) #use root mean squared error to find difference between actual homeownership rates and predicted homeownership rates based on persons below the poverty line (square root of the sum of squared errors)
 ```
 The rmse between homeownership rates and predicted rates using the population in 2010 is 7.185. This is better than both persons below the povety line and persons with a college degree as individual predictors, but it is slightly less accurate than the multiple-variable predictor. 
+
+
+# COMMENTS from WD
+
+# Nice work! Everything looks good.
