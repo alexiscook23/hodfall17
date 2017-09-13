@@ -273,3 +273,4 @@ When might we use the conditional mean?
 - Caluclating average sales for a retail location by day of the week and month
 - Calculating yield rate (proportion of admitted students who attend) by geographic region and income level for a college. 
 - Calculating average employee turnover by level of education and gender
+
