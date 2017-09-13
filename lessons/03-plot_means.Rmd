@@ -1,3 +1,9 @@
+---
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
 #Presenting Data 1: Plotting Conditional Means {#plot_means}
 
 The idea when plotting conditional means is to show how the outcome, or variable of interest, varies as a function of predictors. 
@@ -16,6 +22,8 @@ library(RColorBrewer)
 ```
 
 Next we load in the data, using the `readr` package. Note that this data is saved as comma separated or `csv.` This is an easy file format to recognize. When we use the `readr` package, it gives us some output that says how it interprets the data-- is it a string variable, numeric (float), integer and so on. 
+-csv means comma separated version because it separates different elements with a comma
+-what you save your data as is arbitrary cuz it's only on your computuer, but you should make it the same name as what it's loaded as so that you're not confused
 
 ## Loading Data 
 ```{r}
@@ -26,9 +34,11 @@ save(at,file="at.Rdata")
 
 ## Load the saved version (not necessary, just showing we can!)
 load("at.Rdata")
+View(at)
 ```
 
 Today, our primary outcome of interest will be attrition. This is a binary variable that is currently encoded as text-- "Yes" or "No." We need to encode it as a binary variable with 1 meaning yes and 0 meaning no. After recoding, we need to make sure that the new variable looks correct.
+-should always use a binary variable where 1 means yes and 0 means no; if you were going to do something like gender you'd do "female" and 1 would be yes and 0 would be male (as opposed to saying "gender" and then the 1 and 0 are confusing)
 
 ```{r}
 ## Crate a new variable named attrit and define it as 0
@@ -42,12 +52,18 @@ table(at$attrit,at$Attrition)
 
 ```
 
-
-
+In this recoding, we use "if else" to give a logical statement. In this case, we're saying if the file "attrition" is a yes, then give it a 1. The comma 0 means if it doesn't say yes (meaning it says no), then give it a zero
+-needed to start with at and then the overwrite of at so that R knows which data set we're working with
+-we made a new variable "attrit" so that we could keep the "Attrition" variable as yes and no
 
 ##Univariate Graphics
 
 Univariate graphics help us understand what individual variables look like-- how are they distibuted across the sample? Here's a quick rundown on some univariate graphics. Say we wanted a quick count of who was in each department. We can use geom_bar to get this done. By default, this will give us a count in each department. 
+-when you say "fill" and then give the =department, that means that you're going to fill the chart based on department
+-the colors are assigned automatically, but we can change those later
+-the initial command of using the "at" dataset is imperative so that gg knows where we're pulling data
+-the second line of code (69) says use gg with the geom bar (which automatically gives count as the y axis)
+-never use pie charts (they don't really convey accurate information) or 3D charts (they add unnecessary dimensions to your data) or anything wonky like that
 
 ```{r}
 gg<-ggplot(at,aes(x=Department,fill=Department))
@@ -62,6 +78,10 @@ gg<-ggplot(at,aes(x=DistanceFromHome))
 gg<-gg+geom_histogram(binwidth = 1,fill="lightblue")
 gg
 ``` 
+This histogram shows us that most employees live super close to work (less than 5 miles away even)
+-this means it's "right skewed data" and the mean is higher
+
+
 Density plots provide a continous graphic of the distribution of a variable:
 ```{r}
 gg<-ggplot(at,aes(x=DistanceFromHome))
@@ -72,12 +92,12 @@ gg
 gg<-gg+geom_density(bw=.2)
 gg
 ```
-
+This density plot shows the same info as the histogram; it's showing how many people fall into each range 
+If you want to follow the data more closely, lower the increment of your bandwidth. The reason it looks bizarre in the one with .2 bandwidth is because the data wasn't reported in increments less than a mile, so the data spikes at each increment that is a decimal of the number (like the high point is the people who travel 5 miles and the trough is no one because no one reported 5.4 miles etc)
 
 
 ## Predicting Attrition
 Our first prediction will use business travel as a predictor for attrition. There are three categories here-- non travel, travel infrequently, and frequent travel. We'll calculate levels of attrtion at teach level and then take a look at the data. 
-
 
 ```{r}
 
@@ -117,8 +137,34 @@ gg<-gg+xlab("Amount of Travel")+ylab("Yearly Attrition")
 ##Print
 gg
 ```
+that first line of code says reorder the x axis based on business travel in order of the attr_avg
+-always order the barcharts in order of the underlying variable; it's much easier to understand (esp as we get more complicated)
+-if you wanted to reorder from highest to lowest, put a - in front of the attr_avg in the code
+
 
 *Quick Exercise: Create a bar plot showing average attrition by department instead of travel*
+There's two steps to this: find the averages of each bin using attrition (called at_sum (with attrit as a binary variable)) and group it by Department, then plot Department (ordered by attrition rate average) with attrit on the y axis
+```{r}
+
+at_sum<-at%>%
+  group_by(Department)%>%
+  summarize(attr_avg=mean(attrit))
+
+at_sum
+
+```
+
+```{r}
+## Same asethetics, but now orderred by level
+gg<-ggplot(at_sum,aes(x=fct_reorder(Department,attr_avg),y=attr_avg))
+
+gg<-gg+geom_bar(stat="identity")
+
+## Labeling
+gg<-gg+xlab("Department")+ylab("Yearly Attrition")
+##Print
+gg
+```
 
 A dot plot can be a good way of displaying conditional means as well. Many times dot plots are more easily understood if they are horizontal, so we'll use `coord_flip` to make it horizontal.
 
@@ -152,7 +198,7 @@ at_sum<-at%>%
 ## Get the results
 at_sum
 
-## PLot it using a bar plot
+## Plot it using a bar plot
 gg<-ggplot(at_sum,aes(x=reorder(BusinessTravel,attr_avg),y=attr_avg,color=Gender))
 gg<-gg+geom_bar(stat="identity",aes(fill=Gender),position="dodge")
 gg
@@ -165,6 +211,7 @@ gg
 
 
 ```
+The "dodge" position means set the bars next to each other instead of splitting the bars on top of each other
 
 *Quick Exercise: Create either a bar plot or a dot plot showing attrition by department AND field of education*
 
@@ -180,6 +227,7 @@ at_sum<-at%>%
 
 at_sum
 
+at_sum%>%arrange(attr_avg)
 
 gg<-ggplot(at_sum,aes(x=reorder(BusinessTravel,attr_avg),
                       y=attr_avg,
@@ -193,6 +241,9 @@ gg<-gg+coord_flip()
 ## Print
 gg
 ```
+The facet_wrap code means "create that same graphic but arrange it by this characteristic." In that way, we created different columns based on marital status in which you can still see travel and attrition
+-just use the tilda ~ with the characteristic you want to group by
+-the stat identity code means plot the actual numbers (it's your aesthetic)
 
 _Side_ _Note_: Colors
 
