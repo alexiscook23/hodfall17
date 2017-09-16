@@ -1,0 +1,139 @@
+---
+title: "assignment3_cook.Rmd"
+output: html_document
+---
+
+Load packages and attrition dataset
+```{r  include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(forcats)
+library(RColorBrewer)
+```
+```{r}
+at<-read_csv("https://community.watsonanalytics.com/wp-content/uploads/2015/03/WA_Fn-UseC_-HR-Employee-Attrition.csv")
+
+## Save for later
+save(at,file="at.Rdata")
+
+## Load the saved version (not necessary, just showing we can!)
+load("at.Rdata")
+View(at)
+```
+```{r}
+#so that I hide everything except graphics and actual text in the knit version
+echo=FALSE 
+results='hide' 
+warning=FALSE 
+message=FALSE
+```
+1.  Distribution of monthly income.
+```{r}
+gg<-ggplot(at,aes(x=MonthlyIncome))
+gg<-gg+geom_histogram(binwidth = 200,fill="lightblue")
+gg
+## Axes Labelling 
+gg<-gg+xlab("Monthly Income")+ylab("Number of Employees")
+gg
+``` 
+
+2.  Average level of monthly income by field of education.
+```{r}
+
+at_sum<-at%>%
+  group_by(EducationField)%>%
+  summarize(MonthlyIncome=mean(MonthlyIncome))
+
+at_sum
+
+```
+```{r}
+## Bar plot with monthly income as height and education field as category, bars ordered by level
+gg<-ggplot(at_sum,aes(x=fct_reorder(EducationField,MonthlyIncome),y=MonthlyIncome))
+
+gg<-gg+geom_bar(stat="identity")
+
+## Labeling
+gg<-gg+xlab("Education Field")+ylab("Monthly Income")
+##Print
+gg
+```
+
+3.  Average level of monthly income by field of education and gender.
+```{r}
+## Summarize income by field of education and gender
+at_sum<-at%>%
+  group_by(EducationField,Gender)%>%
+  summarize(MonthlyIncome=mean(MonthlyIncome))
+
+## Get the results
+at_sum
+
+## Plot it using a bar plot
+gg<-ggplot(at_sum,aes(x=reorder(EducationField,MonthlyIncome),y=MonthlyIncome,color=Gender))
+gg<-gg+geom_bar(stat="identity",aes(fill=Gender),position="dodge")
+gg<-gg+xlab("Education Field")+ylab("Monthly Income")
+gg
+```
+
+4. Average levels of monthly income by field of education, gender and job level (scale of 1-5, highest ranked employees are 5)
+```{r}
+
+at_sum<-at%>%
+  group_by(EducationField,Gender,JobLevel)%>%
+  summarize(MonthlyIncome=mean(MonthlyIncome))
+
+at_sum
+
+at_sum%>%arrange(MonthlyIncome)
+
+gg<-ggplot(at_sum,aes(x=reorder(EducationField,MonthlyIncome),
+                      y=MonthlyIncome,
+                      fill=Gender))
+## Bar plot, with unstacked (dodge)
+ gg<-gg+geom_bar(stat="identity",position="dodge")
+## Separate out by job level
+gg<-gg+facet_wrap(~JobLevel)
+## Change orientation to sideways
+gg<-gg+coord_flip()
+gg<-gg+xlab("Education Field")+ylab("Monthly Income, Grouped by Job Level 1-5")
+## Print
+gg
+```
+
+5. Average levels of montly income by field of education, gender, job level and department.
+```{r ,fig.height=6}
+
+at_sum<-at%>%
+  group_by(EducationField,Gender,JobLevel,Department)%>%
+  summarize(MonthlyIncome=mean(MonthlyIncome))%>%
+  ungroup()%>%
+  arrange(MonthlyIncome)
+
+at_sum
+
+## A new variable for every type of employee defined by travel, gender, marital status, and happiness with work/life
+
+at_sum$grouping<-paste0(at_sum$EducationField,
+                       ", ",
+                       at_sum$Gender,
+                       ", ",
+                       at_sum$JobLevel,
+                       ", Work/Life:",
+                       at_sum$Department)
+
+at_sum$grouping<-as.factor(at_sum$grouping)
+
+at_sum%>%select(grouping,MonthlyIncome)
+
+at_sum<-at_sum%>%filter(MonthlyIncome>.01)
+
+gg<-ggplot(at_sum,aes(x=fct_reorder(grouping,MonthlyIncome),y=MonthlyIncome))
+gg<-gg+geom_bar(stat="identity",aes(fill=Department))
+gg<-gg+coord_flip()
+gg<-gg+xlab("Education Field, Gender, Job Level")+ylab("Monthly Income")
+gg
+
+```
+
+
