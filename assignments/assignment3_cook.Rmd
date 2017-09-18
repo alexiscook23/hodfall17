@@ -1,6 +1,8 @@
 ---
 title: "assignment3_cook.Rmd"
-output: html_document
+output:
+  word_document: default
+  html_document: default
 ---
 
 Load packages and attrition dataset
@@ -11,13 +13,8 @@ library(forcats)
 library(RColorBrewer)
 ```
 ```{r}
-at<-read_csv("https://community.watsonanalytics.com/wp-content/uploads/2015/03/WA_Fn-UseC_-HR-Employee-Attrition.csv")
 
-## Save for later
-save(at,file="at.Rdata")
-
-## Load the saved version (not necessary, just showing we can!)
-load("at.Rdata")
+load("../lessons/at.Rdata")
 View(at)
 ```
 ```{r}
