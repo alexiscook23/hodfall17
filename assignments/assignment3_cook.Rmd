@@ -137,3 +137,11 @@ gg
 ```
 
 
+
+
+## COMMENTS from WD
+
+## I know it's been confusing because the instructions have bounced
+## around, but make sure to name your assignment files
+## 03-assignment_cook.Rmd Everything else looks good, nice work on this
+## assignment. How would you make the last graphic more readable?
