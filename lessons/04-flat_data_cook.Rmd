@@ -255,7 +255,7 @@ free_tidy%>%group_by(year)%>%summarize(sum(frl_students))
 Other statistical programs have their own file formats. These are easy for these programs to read in. R can understand all of them, if the `haven` packages is used. 
 
 ### Stata
-Stata is a very popular statistical programming language among economists and social scientists. Stata files are stored in `dta` format. 
+Stata is a very popular statistical programming language among economists and social scientists. Stata files are stored in `dta` format and are stored as .dta (instead of .Rmd etc)
 
 ```{r}
 
@@ -293,7 +293,7 @@ head(hsb_sas)
 
 ## Output
 
-Most of the time, you should store your data as a csv file. This will ensure that pretty much anyone can take a look at it. If you're sure that the only users will be other R users (why would you be sure of this?), then feel free to save it as an `.Rdata` file. 
+Most of the time, you should store your data as a csv file. This will ensure that pretty much anyone can take a look at it. If you're sure that the only users will be other R users (which is almost never unless you're in a class), then feel free to save it as an `.Rdata` file. 
 
 ```{r}
 #Saving as an R file
@@ -306,7 +306,8 @@ Otherwise, go with csv, like so:
 #Outputting delimited
 write_csv(free2,"frl.csv")
 ```
+everyone can always view csv, so that's really what you should save things as
 
-## Databses and flat files
+## Databases and flat files
 
-As we'll discuss later, databases are linked collections of flat files, usually stored in `.csv` format. If you're working with a database technician and would like a flat file for analysis, the way to ask for it is to request a flat file in csv format. Most database analysts will know what you mean by this. We'll cover databases in much more data later. 
+As we'll discuss later, databases are linked collections of flat files, usually stored in `.csv` format. If you're working with a database technician and would like a flat file for analysis, the way to ask for it is to request a flat file in csv format. Most database analysts will know what you mean by this. We'll cover databases in much more detail later. 
