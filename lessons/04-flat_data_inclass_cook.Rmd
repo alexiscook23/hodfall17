@@ -1,0 +1,83 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r NYC SAT}
+#Delimited files
+
+#Load in the SAT dataset from the NYC statistical computing site
+
+sat<-read_csv(file="https://data.cityofnewyork.us/api/views/f9bf-2cp4/rows.csv?accessType=DOWNLOAD")
+
+#the SAT file was an excel file
+write_csv(sat,path="sat.csv")
+
+#Check it out
+head(sat)
+
+##Need these for later
+my.names<-names(sat)
+
+#Write this in a variety of formats to be used later
+write_delim(sat, path="sat.txt",delim="\t")
+
+write_delim(sat, path="sat_semicolon.txt",delim=";")
+#gdata::write.fwf(data.frame(hsb),file="hsb.dat",sep="",colnames=FALSE)
+
+
+save(sat,file="sat.Rdata")
+
+View(sat)
+```
+
+
+
+```{r train}
+train<-read_csv(file="https://www.kaggle.com/c/stumbleupon/download/train.tsv")
+
+train<-read_tsv(file="train.tsv")
+
+write_tsv(train,path="train.tsv")
+
+View(train)
+```
+
+
+```{r crime}
+crime<-read_dta(file="https://stats.idre.ucla.edu/stat/stata/webbooks/reg/crime.dta")
+write_dta(crime,path="crime.dta")
+
+save(crime,file="crime.Rdata")
+
+```
+
+```{r}
+#Data on various nations:
+#https://stats.idre.ucla.edu/wp-content/uploads/2016/02/nations.sav
+
+nations<-read_sav(file="https://stats.idre.ucla.edu/wp-content/uploads/2016/02/nations.sav")
+
+write_sav(nations,path="nations.sav")
+
+save(nations,file="nations.Rdata")
+
+View(nations)
+```
+
+```{r}
+
+cancer<-read_sas(file="http://web1.sph.emory.edu/dkleinb/allDatasets/datasets/cancer.sas7bdat")
+
+write_sas(cancer,path="cancer.sas")
+
+save(cancer,file="cancer.Rdata")
+
+View(cancer)
+```
+
+
