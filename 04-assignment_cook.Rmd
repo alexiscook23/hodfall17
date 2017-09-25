@@ -1,0 +1,127 @@
+---
+title: "04-assignment_cook.Rmd"
+output: html_document
+---
+
+```{r} 
+library(tidyverse)
+library(haven)
+library(readxl)
+```
+
+```{r OECD} 
+oecd<-read_csv(file="http://www.wiley.com/legacy/wileychi/baltagi/supp/Gasoline.dat")
+
+write_csv(oecd,path="oecd.csv")
+
+head(oecd)
+
+View(oecd)
+
+#in the table, all the variables are under a single column; struggling to figure out how to create multiple columns to separate the variables and be able to rename each and then group them to condense and have tidy data
+#I'm going to attempt to turn it into fixed width data so that I can separate the variable and create new columns
+
+my.widths=c(8,#country
+            4, #year
+            11, #lgaspar
+            11, #lincomep
+            11, #lrpmg
+            11, #lcarpcap)
+            
+my_positions<-fwf_widths(my.widths)
+
+oecd2<-read_fwf("oecd",
+         col_positions  =my_positions)
+
+head(oecd2)
+
+names(oecd2)<-my.names
+
+head(oecd2)
+
+#wrote out the code for the following steps, even though they won't work because the file still has a single column at the moment 
+#want to be able to do what we did with the "free" file in class and mutate a new variable comprised of all the variables having to do with a single country (each year of data) so that I can gather them and arrange by country and year
+
+names(oecd)<-c("COUNTRY",
+               "YEAR",
+               "LGASPCAR",
+               "LINCOMEP",
+               "LRPMG",
+               "LCARPCAP")
+
+oecd_total<-oecd%>%select(COUNTRY,YEAR)
+
+oecd_total<-free_total%>%gather(`COUNTRY`,`YEAR`,key=year,value=total_years)
+
+View(oecd_total)
+
+oecd_total<-oecd_total%>%arrange(COUNTRY,YEAR)
+
+save(oecd,file="oecd.Rdata")
+```
+
+```{r NES}
+
+#downloaded the NES 2004 survey data off website
+
+nes<-read_sav(file="http://www.uta.edu/faculty/story/DataSets/NES2004.sav")
+
+head(nes)
+
+View(nes)
+
+#remove unnecessary columns
+nes2<-nes[,-(c(1,2,3))]
+
+head(nes2)
+```
+
+```{r}
+#create new variable to consolidate abortion info
+
+nes3<-nes2%>%select(abort_funding,
+                           abort_imp,
+                           abort_partial,
+                           abort_rights)
+
+names(nes3)<-c("funding","importance","partial","self-placement")
+
+nes3<-nes3%>%gather(`funding`,`importance`,`partial`,`self-placement`,key=issues,value=overall_importance)
+
+View(nes3)
+
+#remove the abortion info from nes2 and then left-join nes3 and nes2
+nes4<-nes2[,-(c(1,2,3,4))]
+
+nes5<-left_join(nes4,nes3,by=c("importance","overall_importance"))
+
+save(nes5,file="nes.Rdata")
+```
+
+```{r GSS}
+#downloaded general social survey as an excel file 
+
+gss<-read_excel(file="http://www.uta.edu/faculty/story/DataSets/GeneralSocialSurvey1996ExcelDataStudentVersion.xls")
+
+head(gss)
+
+save(gss,file="gss.Rdata")
+```
+
+```{r maindata}
+
+#downloaded april 2009 csv data as text file
+
+maindata<-read_csv(file=https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/26410&studyListingIndex=1_f1a615c2cbee97fb79c9d575ae73#)
+
+head(maindata)
+
+save(maindata,file=maindata.Rdata)
+
+```
+
+```{r lalonde}
+psid<-read_csv(file=http://users.nber.org/~rdehejia/data/psid_controls.txt)
+
+save(psid,file=psid.Rdata)
+```
