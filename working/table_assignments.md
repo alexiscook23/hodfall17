@@ -36,35 +36,34 @@ class<-class%>%arrange(random)
 
 class["index"]<-seq(1:dim(class)[1])
 
-class<-class%>%mutate(table=cut(index,6,(1:6)))
+class<-class%>%mutate(table=cut(index,9,(1:9)))
 
 class$rmse<-NA
 
 print(select(class,first_name,last_name,table),n=100)
 ```
 
-    ## # A tibble: 19 × 3
+    ## # A tibble: 18 × 3
     ##    first_name  last_name  table
     ##         <chr>      <chr> <fctr>
     ## 1       Susan       Cobb      1
-    ## 2       James  Michaelis      1
-    ## 3       Ethan      Polan      1
-    ## 4        Siqi       Chen      1
-    ## 5      Brenda         Lu      2
-    ## 6       Raven       Delk      2
-    ## 7     William   Sullivan      2
-    ## 8      Rachel      Anand      3
-    ## 9      Connor       Kreb      3
-    ## 10     Claire    Fogarty      3
-    ## 11      Henry Livingston      4
-    ## 12       Cole      Smith      4
-    ## 13        Ben     Scheer      4
-    ## 14       Jack     Cramer      5
-    ## 15       C.J.       Pond      5
-    ## 16      Arjun       Shah      5
-    ## 17      Sunny        Cao      6
-    ## 18      Katie      Means      6
-    ## 19     Alexis       Cook      6
+    ## 2       Ethan      Polan      1
+    ## 3        C.J.       Pond      2
+    ## 4      Brenda         Lu      2
+    ## 5      Rachel      Anand      3
+    ## 6      Claire    Fogarty      3
+    ## 7       Henry Livingston      4
+    ## 8         Ben     Scheer      4
+    ## 9        Cole      Smith      5
+    ## 10      Raven       Delk      5
+    ## 11       Jack     Cramer      6
+    ## 12     Connor       Kreb      6
+    ## 13       Siqi       Chen      7
+    ## 14      Sunny        Cao      7
+    ## 15      Katie      Means      8
+    ## 16       Will   Sullivan      8
+    ## 17     Alexis       Cook      9
+    ## 18      Arjun       Shah      9
 
 ``` r
 names(class)
@@ -101,5 +100,7 @@ gg<-ggplot(class_summary,aes(x=table,y=current_rmse,fill=table))
 gg<-gg+geom_bar(stat="identity",position=position_dodge())
 gg
 ```
+
+    ## Warning: Removed 3 rows containing missing values (geom_bar).
 
 ![](table_assignments_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-2-1.png)

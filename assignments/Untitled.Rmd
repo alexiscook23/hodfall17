@@ -1,0 +1,19 @@
+---
+title: "Untitled"
+author: "Will Doyle"
+date: "September 20, 2017"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+## Three Questions
+
+- What did you work on last week?
+- What are you going to work on this week? 
+- Is there anything that's keeping you from completing your goal? 
+
+
