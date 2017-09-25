@@ -170,6 +170,7 @@ names(free2)<-c("state",
                 "pc_frl_2010",
                 "pc_frl_2011",
                 "pc_frl_2012")
+
 ```
 this renames the columns in your free2 dataset
 
