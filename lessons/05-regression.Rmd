@@ -6,16 +6,12 @@ output: github_document
 ## Overview
 
 So far, we've been using just the simple mean to make predictions. Today, we'll continue using the simple mean to make predictions, but now in a complicated way. Before, when we calculated conditional means, we did so in certain "groupings" of variables. When we run linear regression, we no longer need to do so. Instead, linear regression allows us to calculate the conditional mean of the outcome at _every_ value of the predictor. If the predictor takes on just a few values, then that's the number of conditional means that will be calculated. If the predictor is continuous and takes on a large number of values, we'll still be able to calculate the conditional mean at every one of those values. 
-So essentially a regression model is the expected value of y as a function of x
----beta0 is the intercept (the y value if x is zero) and b1x1 is basically the slope and then epsilon is how far each individual point is from the regression line (the averages); epsilon is the error term
 
 The model we posit for regression is as follows:
 
 $$Y=\beta_0+\beta_1 x_1 +\beta_2 x_2+ ... \beta_k x_k + \epsilon$$
 
 It's just a linear, additive model. Y increases or decreases as a function of x, with multiple x's included. $\epsilon$ is the extent to which an individual value is above or below the line created. 
----you can have as many predictors as you want as long as it's less than the number of observations (which it will be cuz you'll have data with thousands of observations)
----each b1x1 is a predictor
 
 Let's say that you've got some consumer data and you want to target those families that are likely to spend between  \$100and \$500 a month on dining out. We would need to be able to predict which families would spend in that range based on observable characteristics like family size, income and family type. 
 
@@ -34,15 +30,16 @@ load("cex.RData")
 ##---------------------------------------
 
 ## This code defines a testing and training dataset
-## You don't need it right now, but I want to show you how it's done
-# we have it written out as comments so that we don't all get different answers since if we run this code we'll all be pulling from different random samples
+## You don't need it right now, but I want to show you
+## how it's done
 
 # Get half of the data via random sample
 #cex_train<-sample_frac(cex,.5)
 
 #save(cex_train,file="cex_train.Rdata")
 
-## Testing data is the other half of the data--- the half of cex not in the training dataset
+## Testing data is the other half of the data--- the half of cex not in the 
+##training dataset
 
 #cex_test<-setdiff(cex,cex_train)
 
@@ -91,7 +88,7 @@ explanation<-c("id",
 
 codebook<-data.frame(my.vals, explanation)
 
-View(codebook)
+
 
 ## A bit of wrangling
 
@@ -121,7 +118,7 @@ gg
 
 
 ```
-This graph isn't predictive; it's just us looking at how much people dine out; it's the variation in how much people spend on dining out (so almost 1000 families spend 0, about 100 spend 2000 etc)
+
 
 Because this variable is pretty non-normally distributed, we may want to think about transforming it. For now, let's just work with it as-is. Let's see if people with bigger families spend more on dining out more than those with smaller families. Before, we would have calculated the conditional mean at every level of family size, or in certain groupings of family size. With regression, we simply specify the relationship. 
 
@@ -129,11 +126,9 @@ Because this variable is pretty non-normally distributed, we may want to think a
 
 #Model 1: simple bivariate regression
 
-mod1<-lm(dine_out~fam_size,data=cex) #outcome on left, predictor on right #lm means linear model; we're creating this model named mod1 that's a linear model that shows dining out as a function of family size
+mod1<-lm(dine_out~fam_size,data=cex) #outcome on left, predictor on right 
 
-summary(mod1) #the residuals show the standard errors; so this summary shows that the median error is -140 meaning we're an average of $140 too low in our estimation
-#we're not really interested in the statistical significance of each of the coefficients using t value because it's basically always going to significant (t value greater than 2). Basically it just means the predictive value is not zero. We're more interested in predictive accuracy of our model using rmse
-#the estimate std is interesting because it can show some predictive power (like in this case an increase in one child is an increase in $41 in dining expenditure)
+summary(mod1)
 confint(mod1)
 
 g1<-ggplot(cex, aes(x=fam_size,y=dine_out))+ #specify data and x and y
@@ -141,27 +136,19 @@ g1<-ggplot(cex, aes(x=fam_size,y=dine_out))+ #specify data and x and y
            geom_smooth(method=lm) #ask for lm line
 g1
 
-cex<-cex%>%mutate(pred1=predict(mod1)) #basically just adding another variable in the dataset (using mutate) where it's the predictive value of y with every value of x (predict using data in memory)
+cex<-cex%>%mutate(pred1=predict(mod1)) #predict using data in memory
  
-rmse_1<-with(cex,rmse(dine_out,pred1)); rmse_1
-#this says that with the dataset called cex use the variables called dine_out and pred1 create rmse (the semicolon and then rmse_1 just means show me the prediction after you create it)
+rmse_1<-with(cex, rmse(dine_out,pred1)) ; rmse_1
+
+mod1a<-lm(dine_out~inclass,data=cex); summary(mod1a)
 
 ```
 
 What this shows is that as family size increases, the amount spent on dining out increases. For every additional family member, an additional \$`r prettyNum(mod1$coefficients[2],digits=0)` is predicted to be spent on dining out. The rmse of `r  prettyNum(rmse_1,digits=2)` gives us a sense of how wrong the model tends to be when using just this one predictor. 
----this isn't a great predictor because there's huge variation around the trendline. Also, the data really thins out after 5 (because few families have over 5 children)
 
 _Quick Exercise_ Run a regression using a different predictor. Calculate rmse and see if you can beat my score. 
-```{r exercise}
-#chose to use poverty level as a predictor of dining out expenditure; was a better predictor than family size based on the rmse
-mod2<-lm(dine_out~pov_cym,data=cex) 
 
-cex<-cex%>%mutate(pred2=predict(mod2))
 
-rmse_2<-with(cex,rmse(dine_out,pred2)); rmse_2
-
-```
-Quick note: if you used a categorical variable like income level, then it'll be based off a reference point (the first income level, meaning the most impoverished) and then each standard thing after will mean "how much more does this income level spend on dining out than the reference level" but you need to watch statistical significance using t value for those cuz it could actually be equal to zero (meaning there is no difference between expenditure of the different income levels)... I didn't use a categorical variable tho because poverty was binary in this case
 ## Multiple Regression. 
 
 Okay, so we can see that this is somewhat predictive, but we can do better. Let's add in a second variable: whether or not the family is below the poverty line. 
@@ -169,15 +156,15 @@ Okay, so we can see that this is somewhat predictive, but we can do better. Let'
 ```{r}
 #Part 2: Multiple regression
 
-mod3<-lm(dine_out~fam_size+
+mod2<-lm(dine_out~fam_size+
            pov_cym, #can only take on two values
           data=cex)
 
-summary(mod3) 
+summary(mod2) 
 
-cex<-cex%>%mutate(pred3=predict(mod3))
+cex<-cex%>%mutate(pred2=predict(mod2))
 
-rmse_3<-with(cex,rmse(dine_out,pred3));rmse_3
+rmse_2<-with(cex,rmse(dine_out,pred2));rmse_2
 
 ```
 
@@ -190,26 +177,25 @@ Maybe it's the case that those who spend more on groceries dine out less. Let's 
 ```{r}
 #Model 3: predicting dining out using other variables and grocery spending
 
-mod4<-lm(dine_out~
+mod3<-lm(dine_out~
            fam_size+
            pov_cym+
            grocery,
            data=cex)
 
-summary(mod4)
+summary(mod3)
 
 g2<-ggplot(cex, aes(x=grocery,y=dine_out))+
            geom_point(shape=1)+ 
            geom_smooth(method=lm)
 g2
-#this graph shows that the idea that those who spend more on groceries would spend less on dining out is totally wrong; those who spend more just spend more
 
-cex<-cex%>%mutate(pred4=predict(mod4))
 
-rmse_4<-with(cex,rmse(dine_out,pred4));rmse_4
+cex<-cex%>%mutate(pred3=predict(mod3))
+
+rmse_3<-with(cex,rmse(dine_out,pred3));rmse_3
 
 ```
-What we're seeing with the trendline in the graph is that regressions are heavily skewed by outliers and most of the data is clumped in the corner because people really aren't spending that much on dining; would be better to make it proportional and ask how much they're spending as a proportion of their income etc or even better is to take the log transform
 
 Hmm, what happened here?
 
@@ -226,32 +212,31 @@ Economists just basically take the natural log of everything that's denominated 
 ```{r}
 
 #Part 4: Working with transformations
-mod5<-lm(log(dine_out+1)~ #log of dining out, plus one for zeros
+mod4<-lm(log(dine_out+1)~ #log of dining out, plus one for zeros
            +log(grocery+1)+ #log of groceries, plus one again
            pov_cym+ #poverty
            fam_size #family size
          ,data=cex)
 
-summary(mod5)
-#so this is the model of the log of the outcome instead of the actual outcome
-#the estimate in the summary is on a percent scale, so it means that for every 1 percent increase in dining out, there's a .4 percent increase in grocery spending
-cex<-cex%>%mutate(pred5=predict(mod5))
+summary(mod4)
 
-rmse_5<-with(cex,exp(rmse(log(dine_out+1),pred5)));rmse_5
-#so we just put the output on the log scale and then took it back into normal numbers; the command to take it back is exponentiate (called "exp")
-#this is way, way more accurate of a prediction. We went from an rmse of 577 to 12. You'll know you need to transform with log if your data looks super skewed like ours did in the beginning 
+cex<-cex%>%mutate(pred4=predict(mod4))
 
-g5<-ggplot(cex, aes(x=grocery,y=exp(pred5),color=pov_cym))
-g5<-g5+geom_point(shape=1)
+rmse_4<-with(cex,exp(rmse(log(dine_out+1),pred4)));rmse_4
 
-g5
+
+
+g4<-ggplot(cex, aes(x=grocery,y=exp(pred4),color=pov_cym))
+g4<-g4+geom_point(shape=1)
+
+g4
 
 # Function defined by coefficients
 
-fun_mod5<-function(x) exp(mod5$coefficients[1]+ 
-                          (mod5$coefficients[2]*log(x+1))+
-                          (mod5$coefficients[3]*1)+
-                          (mod5$coefficients[4]*mean(cex$fam_size,na.rm=TRUE))  
+fun_mod4<-function(x) exp(mod4$coefficients[1]+ 
+                          (mod4$coefficients[2]*log(x+1))+
+                          (mod4$coefficients[3]*1)+
+                          (mod4$coefficients[4]*mean(cex$fam_size,na.rm=TRUE))  
                           ) 
 
 g4a<-ggplot(cex,aes(x=grocery,y=dine_out))
