@@ -1,0 +1,67 @@
+---
+title: "Project Data"
+output: html_document
+---
+
+```{r} 
+library(tidyverse)
+library(haven)
+library(readxl)
+```
+
+```{r total emissions}
+##https://www.epa.gov/sites/production/files/2016-08/us-ghg-emissions_fig-1.csv
+
+if(file.exists("emissions.csv")==FALSE){
+  download.file("https://www.epa.gov/sites/production/files/2016-08/us-ghg-emissions_fig-1.csv",destfile="emissions.csv")
+emissions<-read_csv("emissions.csv")  
+}else{
+  emissions<-read_csv("emissions.csv")
+}
+
+emissions<-emissions[-(c(1:5)), ]
+
+View(emissions)
+```
+
+```{r industry}
+if(file.exists("industry.csv")==FALSE){
+  download.file("https://www.epa.gov/sites/production/files/2016-08/us-ghg-emissions_fig-2.csv",destfile="industry.csv")
+industry<-read_csv("industry.csv")  
+}else{
+ industry<-read_csv("industry.csv")
+}
+
+industry<-industry[-(c(1:5)), ]
+
+View(industry)
+```
+
+```{r GDP}
+if(file.exists("gdp.csv")==FALSE){
+  download.file("https://www.epa.gov/sites/production/files/2016-08/us-ghg-emissions_fig-3.csv",destfile="gdp.csv")
+gdp<-read_csv("gdp.csv")  
+}else{
+ gdp<-read_csv("gdp.csv")
+}
+
+gdp<-gdp[-(c(1:5)), ]
+
+View(gdp)
+```
+
+```{r per capita state emission}
+#https://www.eia.gov/environment/emissions/state/analysis/excel/table5.xlsx
+
+if(file.exists("pcstate.xls")==FALSE){
+  download.file("https://www.eia.gov/environment/emissions/state/analysis/excel/table5.xlsx",destfile="pcstate.xls")
+pcstate<-read_excel("pcstate.xls")  
+}else{
+ pcstate<-read_excel("pcstate.xls")
+}
+
+View(pcstate)
+```
+
+
+
