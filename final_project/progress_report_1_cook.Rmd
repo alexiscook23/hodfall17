@@ -6,3 +6,8 @@ Governmental agencies like the EPA have published data on their website. For exa
 
 3. A few lines describing your dependent variable in detail. What is the nature of this outcome as a variable?
 I'm not sure if I'll have a single variable that I work with, such as total gas emissions grouped by each state, or if I'll include multiple environmental variables. I think comparing data by state could be interesting and give a more nuanced view of the issue, especially if states have different standards for various factors such as emissions or waste. Because the EPA enforces variables like air pollution and waste and chemical contamination, these two variables are already closely monitored in regards to various companies. I would like to look at the data on either a state or national scale. If I have to choose one, I'll look at air pollution on a state-by-state basis. I know the EPA has offices in every state, so I'm hoping I could find sufficient data to compare across state lines. Federal policy is often shaped by state policy, since individual state laws can serve as a "testing grounds" for the effectiveness of various policies. Therefore, comparing state air pollution could even indicate the future of federal regulation. Air pollution is federally regulated by the Clean Air Act and the Corporate Average Fuel Economy.
+
+## COMMENTS from WD
+
+## We've spoken about this since. Check out the interface to climate data
+## here: https://cran.r-project.org/web/packages/rnoaa/rnoaa.pdf
