@@ -69,5 +69,8 @@ pcstate<-read_excel("pcstate.xls")
 View(pcstate)
 ```
 
+take a look at the APIs and how we can use
+
+can have multiple binary variables for the bivariate graphic NOA data (national oceanic something data online) and show different graphics of what's the average contaminants for states with this policy versus this policy etc
 
 

@@ -220,6 +220,21 @@ mod4<-lm(log(dine_out+1)~ #log of dining out, plus one for zeros
            log(booze_home+1) #drinks booze at home
          ,data=cex,na.action="na.exclude")
 
+##predictions from model 4
+mod4_predict<-predict(mod4)
+
+##testing data
+test_dine_out<-cex_test$dine_out
+
+##create new dataset that compares mod4 and the testing data but only the dining out variable
+compare_data<-data.frame(mod4_predict,test_dine_out)
+
+compare_data<-compare_data%>%filter(is.na(mod5_predict)==FALSE)
+
+mod4_predict<-predict(mod4,newdata=cex_test)
+
+
+##can  see the summary of mod4 without manipulating the data and take the exponent of residual error for in-sample rmse
 summary(mod4)
 
 exp(2.05)
@@ -229,6 +244,7 @@ cex<-cex%>%mutate(pred4=predict(mod4))
 rmse_4<-with(cex,exp(rmse(log(dine_out+1),pred4)));rmse_4
 
 #the rmse won't work whenever you do na.action="na.exclude", but you can still see the standard error on the summary (residual standard error). The difference is that this standard error is based on the logs in your model, so you need to take the exponent of that number. For examply, my standard error was 2.05, so I take exp(2.05) to find out the actual rmse of this model
+##---the issue is that this will only be the rmse for the in-sample data; to get the rmse for out-of-sample data, you'll have to manipulate the data
 
 g4<-ggplot(cex, aes(x=grocery,y=exp(pred4),color=pov_cym))
 g4<-g4+geom_point(shape=1)
@@ -280,6 +296,7 @@ g5
 
 ## Testing and Training
 The essence of prediction is discovering the extent to which our models can predict outcomes for data that does not come from our sample. Many times this process is temporal. We fit a model to data from one time period, then take predictors from a subsequent time period to come up with a prediction in the future. For instance, we might use data on team performance to predict the likely winners and losers for upcoming soccer games. 
+---we have the code to split the data in half up in lines 42 and down (it's commented out)
 
 This process does not have to be temporal. We can also have data that is out of sample because it hadn't yet been collected when our first data was collected, or we can also have data that is out of sample because we designated it as out of sample.
 
@@ -298,13 +315,25 @@ load("cex_test.Rdata")
 rmse_5_test<-exp(rmse(log(cex_test$dine_out+1),cex$pred5))
 
 rmse_5;rmse_5_test
+
+
+#try comparing rmse with different models you have above; the rmse of model 3 is terrible because there were no logs in that model
+rmse_5_test;rmse_3
+
+rmse_5_test;rmse_4
+#the rmse of model 4 is NA because of missing data in the model
+
 ```
 Why is the value from the testing dataset so much larger? 
+--they're just different samples so they have different rmse; it should raise eyebrows that our rmses are so different tho... means we're not as accurate as we thought. the key to making predictions is to try and make a model that will be good at making sample data (the difference in rmse should show us that we're not that great at this point)
+--the trick is to get enough predictors in there that you have a good prediction but also not too many predictors where it's overfit only to the half of the data that youre using
 
+#run rmse using the out of sample data
 
 ## Regression using a binary outcome
 
 You can also run a regression using a binary variable. Let's recode and then use our cigarettes variable to look at predictors of buying any cigarretes at all.
+----you should know that regressions on binary variables will be a little wonky regarding the summary, but it can still be good as an intermediary assessment
 
 ```{r}
 cex$cigs<-0
