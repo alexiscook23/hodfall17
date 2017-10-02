@@ -2,12 +2,18 @@
 title: "Project Data"
 output: html_document
 ---
-
-```{r} 
+```{r  include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(plotly)
+library(gridExtra)
+library(ModelMetrics)
 library(haven)
 library(readxl)
+library(forcats)
+library(RColorBrewer)
 ```
+
 
 ```{r total emissions}
 ##https://www.epa.gov/sites/production/files/2016-08/us-ghg-emissions_fig-1.csv
@@ -69,8 +75,145 @@ pcstate<-read_excel("pcstate.xls")
 View(pcstate)
 ```
 
+```{r state gross co2 emission by year}
+#https://www.eia.gov/environment/emissions/state/analysis/excel/table1.xlsx
+
+if(file.exists("gross_state.xls")==FALSE){
+  download.file("https://www.eia.gov/environment/emissions/state/analysis/excel/table1.xlsx",destfile="gross_state.xls")
+gross_state<-read_excel("gross_state.xls",skip=4,col_names=FALSE)  
+}else{
+  gross_state<-read_excel("gross_state.xls",skip=4,col_names=FALSE)
+}
+
+
+```
+
+```{r new variable state emission caps binary}
+em_caps<-
+#should i make an excel file on my computer and manually input emission caps as a binary variable?
+```
 take a look at the APIs and how we can use
 
 can have multiple binary variables for the bivariate graphic NOA data (national oceanic something data online) and show different graphics of what's the average contaminants for states with this policy versus this policy etc
 
+```{r univariate plot}
+## Create a rank variable for income 
+pd<-pd%>%mutate(percapinc_rank=rank(percapinc.2010))
+
+## Plot by rank
+
+gg<-ggplot(data=pd , aes(x=percapinc_rank,
+                         y=percapinc.2010,
+                         text=county))
+##Add Axis Labels
+gg<-gg+xlab("Rank")+ylab("Per Capita Income, 2010")
+
+## Add Points
+gg<-gg+geom_point(alpha=.5,size=.5)
+
+gg
+
+## Save for later
+gg1<-gg
+
+# Make Interactive plot
+gg_p<-ggplotly(gg)
+
+gg_p
+```
+
+```{r dif univariate plot (bar)}
+gg<-ggplot(data,aes(x=Department,fill=Department))
+gg<-gg+geom_bar()
+gg
+``` 
+
+```{r histogram univariate}
+gg<-ggplot(at,aes(x=DistanceFromHome))
+gg<-gg+geom_histogram(binwidth = 1,fill="lightblue")
+gg
+``` 
+
+```{r condtl_mean_single}
+##Condtional Average across a single variable
+
+## Create a variable for quartiles of college education
+pd<-pd%>%mutate(coll_grad_level=ntile(coll_grad_pc,4))
+
+table(pd$coll_grad_level)
+
+pd<-pd%>%group_by(coll_grad_level)%>% ## Group by predictor
+  ##Calculate mean at each level of predictor
+  mutate(pred_income_college=mean(percapinc.2010))%>% 
+  ## Ungroup
+  ungroup()%>% 
+  #Rank by prediction, with ties sorted randomly
+  mutate(pred_income_college_rank=rank(pred_income_college,ties.method="random"))
+
+
+gg<-ggplot(data=pd,aes(x=pred_income_college_rank,y=percapinc.2010,color="Actual"))
+gg<-gg+geom_point(alpha=.5,size=.5)
+gg<-gg+geom_point(aes(x=pred_income_college_rank,y=pred_income_college,color="Predicted:Conditional Mean, 1 var"))
+gg<-gg+ scale_color_manual("Type",values=c("Predicted:Conditional Mean, 1 var"="red","Actual"="black"))
+gg<-gg+theme(legend.position="bottom")
+gg<-gg+xlab("Rank")+ylab("Per Capita Income, 2010")
+gg
+
+##Save for later
+gg3<-gg
+
+```
+
+```{r condtl_mean_multiple}
+
+##Condtional average across multiple variables
+
+## Calculate quartiles of home value
+pd<-pd%>%mutate(median_home_level=ntile(median_home_val,4))
+
+table(pd$median_home_level)
+
+##Make prediction: income by quartiles of education and home values
+
+pd<-pd%>%group_by(coll_grad_level,median_home_level)%>% ## Grouping at multiple levels
+  mutate(pred_income_college_home=mean(percapinc.2010))%>%
+  ungroup()%>%
+  mutate(pred_income_college_home_rank=rank(pred_income_college_home,ties.method="random"))
+
+## Showing the various levels
+gg<-ggplot(data=pd,aes(x=pred_income_college_home_rank,y=percapinc.2010,color="Actual"))
+gg<-gg+geom_point(alpha=.5,size=.5)
+gg<-gg+geom_point(aes(x=pred_income_college_home_rank,
+                      y=pred_income_college_home,
+                      color="Predicted:Conditional Mean, 2 vars")
+)
+
+gg<-gg+scale_color_manual("Type",values=c("Actual"="black",
+                                  "Predicted:Conditional Mean, 2 vars"="orange"
+))
+
+gg<-gg+theme(legend.position="bottom")
+gg<-gg+xlab("Rank")+ylab("Per Capita Income")
+
+gg
+
+## Save for later
+
+gg4<-gg
+```
+
+```{r conditional mean plot w indep 2 variables}
+## Summarize attrition by travel AND gender
+at_sum<-at%>%
+  group_by(BusinessTravel,Gender)%>%
+  summarize(attr_avg=mean(attrit))
+
+## Get the results
+at_sum
+
+## Plot it using a bar plot
+gg<-ggplot(at_sum,aes(x=reorder(BusinessTravel,attr_avg),y=attr_avg,color=Gender))
+gg<-gg+geom_bar(stat="identity",aes(fill=Gender),position="dodge")
+gg
+```
 
