@@ -9,3 +9,4 @@ In this assignment, you'll be asked to predict two related items: first, who spe
 4. Create a subset of the data that only includes people who spent something (more than 0) on cigarettes. 
 5. Using this subset of the data, predict spending on cigarettes among the group who spent more than 0. 
 6. Make some equally well-written comments regarding which variables predict expenditures on cigarettes among people who smoke (or at least buy cigarettes). 
+7. Calculate the rmse for your model agains the testing version of this data. 
