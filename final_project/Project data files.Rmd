@@ -48,7 +48,13 @@ gdp<-read_csv("gdp.csv")
 gdp<-gdp[-(c(1:5)), ]
 
 View(gdp)
+
+#trying to find explanations for the drop in total US emissions in 2009; it was the year Obama won the presidency, with the support of numerous environmental groups. it was also the year he enacted a program that set the first-ever standard for greenhouse gas emissions for cars
 ```
+
+timeline of all federal environmental policy: http://www.naem.org/?CP_COMP_milestones
+
+table of different types of policies and how long states have had them: http://www.nature.com/nclimate/journal/v4/n11/fig_tab/nclimate2385_T1.html (could make a binary chart for each state and run a regression)
 
 ```{r per capita state emission}
 #https://www.eia.gov/environment/emissions/state/analysis/excel/table5.xlsx
