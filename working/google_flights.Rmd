@@ -1,0 +1,18 @@
+---
+title: "Google API"
+author: "Will Doyle"
+date: "October 2, 2017"
+output: html_document
+---
+
+
+```{r}
+library(tidyverse)
+library(devtools)
+install_github('rweyant/googleflights')
+library(googleflights)
+set_apikey("AIzaSyB0gh2bWmfYhfkvSGsm6b_5pm445gIXEA4")
+
+search(origin='DTW',dest='BCN',startDate='2015-11-27',returnDate='2015-12-11')
+```
+

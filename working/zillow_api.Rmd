@@ -1,0 +1,70 @@
+---
+title: "Zillow Housing Prices"
+author: "Will Doyle"
+date: "10/3/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(XML)
+```
+
+```{r}
+zillow_id<-readLines("zillow_id.txt")
+
+```
+
+
+```{r}
+
+load("zipCityCountyStateMap.Rda")
+names(zipMap2)<-c("state","county","zip","city_name","countyname","statename")
+
+# You can put it any county you want here
+
+ziplist<-zipMap2$zip[zipMap2$countyname=="Davidson County, TN"]
+citylist<-zipMap2$city_name[zipMap2$countyname=="Davidson County, TN"]
+
+city.zip<-data.frame(ziplist,citylist)
+names(city.zip)<-c("zip","city")
+
+
+if (file.exists("zdemodata.RData")==FALSE){
+zdemodata=list(zip=character(),medListPrice=numeric(),medValSqFt=numeric(),zhvi=numeric())
+
+for (i in 1:length(ziplist)) {
+  url=paste("http://www.zillow.com/webservice/GetDemographics.htm?zws-id=",zwsid,"&zip=",ziplist[i],sep="")
+  x=xmlInternalTreeParse(url)
+  zdemodata$zip[i]=ziplist[i]
+  x2=xpathApply(x,"//table[name = 'Affordability Data']/data/attribute[name = 'Median List Price']/values/zip/value",xmlValue)
+  zdemodata$medListPrice[i]=x2[[1]][1]
+  x3=xpathApply(x,"//table[name = 'Affordability Data']/data/attribute[name = 'Median Value Per Sq Ft']/values/zip/value",xmlValue)
+  zdemodata$medValSqFt[i]=x3[[1]][1]
+  x4=xpathApply(x,"//table[name = 'Affordability Data']/data/attribute[name = 'Zillow Home Value Index']/values/zip/value",xmlValue)
+  if(is.null(x4)){
+    x4=0}
+  zdemodata$zhvi[i]=x4[[1]][1]
+  }
+
+zdemodata2=data.frame(zdemodata,stringsAsFactors=FALSE)
+zdemodata2$medListPrice=as.numeric(zdemodata2$medListPrice)
+zdemodata2$medValSqFt=as.numeric(zdemodata2$medValSqFt)
+save(zdemodata2,file="zdemodata.RData")
+}else{
+  load("zdemodata.RData")
+}
+
+head(zdemodata2)
+```
+
+
+```{r}
+zip_house_data<-left_join(city.zip,zdemodata2,by="zip")
+```
+
+```{r}
+zhvi<-read_csv("http://files.zillowstatic.com/research/public/City/City_Zhvi_AllHomes.csv")
+```
+
