@@ -357,3 +357,5 @@ g4
 ## Thinking about regression for prediction
 
 You MUST remember: correlation is not causation. All you can pick up on using this tool is associations, or common patterns. You can't know whether one thing causes another. Remember that the left hand side variable could just as easily be on the right hand side. 
+
+*****Go look on 05-regression.Rmd because he added extra stuff about how to use the linear regression model to make actual predictions (multiply the coefficients and then add them all together and take the exponent, since it was a log for the regression, and that answer is your actual prediction)

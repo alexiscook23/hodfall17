@@ -59,8 +59,10 @@ head(cap_laws)
 View(cap_laws)
 
 #trying to merge my binary csv with coal data but won't let me because the labels are different
-total<-merge(cap_laws,coal_co2,by=State)
+#need to figure out how to change labels
+coal_laws_total<-merge(cap_laws,coal_co2,by=State)
 #trying to group states by binary (whether or not they have the law)
+#is there a way to group by response (as in 0 or 1) instead of rank?
 cap_laws_group<-cap_laws%>%mutate(binary_rank=rank(X2))
 
 #trying to use this binary grouping as a predictor for co2 emissions, but struggling because can't figure out how to cross between 2 datasets in the commands (X__35 is the 2014 emissions data from the coal dataset but the binary data is in a separate csv file)
