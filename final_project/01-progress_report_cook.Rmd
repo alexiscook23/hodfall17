@@ -1,0 +1,51 @@
+---
+title: "02-progress_report_cook.Rmd"
+output: html_document
+---
+
+```{r  include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(plotly)
+library(gridExtra)
+library(ModelMetrics)
+library(haven)
+library(readxl)
+library(forcats)
+library(RColorBrewer)
+```
+
+```{r coal state emissions}
+download.file("https://www.eia.gov/environment/emissions/state/excel/coal_CO2_by_state_2014.xlsx",destfile = "coal_co2.xlsx",method="curl")
+
+coal_co2<-read_excel("coal_co2.xlsx")
+
+coal_co2
+
+View(coal_co2)
+```
+Dependent Variable: CO2 Emissions by State
+Graphic: Rank of State Percent Change in CO2 Emissions from 1980-2014
+```{r univariate plot}
+## Create a rank variable for percent change (excluding unnecessary rows)
+
+coal_co2_slim<-coal_co2[-(c(1,2,55:58)), ]
+
+View(coal_co2_slim)
+
+coal_co2_slim<-coal_co2_slim%>%mutate(percent_change_rank=rank(X__36))
+
+## Plot by rank
+gg<-ggplot(data=coal_co2 , aes(x=percent_change_rank,
+                         y=X__36))
+##Add Axis Labels
+gg<-gg+xlab("State Rank")+ylab("Percent Change 1980-2014")
+
+## Add Points
+gg<-gg+geom_point(alpha=1,size=.5)
+
+#figure out how to change y axis bins 
+gg
+```
+
+

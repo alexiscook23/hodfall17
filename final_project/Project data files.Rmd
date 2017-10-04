@@ -65,6 +65,7 @@ table of different types of policies and how long states have had them: http://w
 ```{r per capita state emission}
 #https://www.eia.gov/environment/emissions/state/analysis/excel/table5.xlsx
 
+#this one doesn't work
 if(file.exists("pcstate.xls")==FALSE){
   download.file("https://www.eia.gov/environment/emissions/state/analysis/excel/table5.xlsx",destfile="pcstate.xls")
 pcstate<-read_excel("pcstate.xls")  
@@ -72,7 +73,11 @@ pcstate<-read_excel("pcstate.xls")
  pcstate<-read_excel("pcstate.xls")
 }
 
-View(pcstate)
+download.file("https://www.eia.gov/environment/emissions/state/excel/coal_CO2_by_state_2014.xlsx",destfile = "coal_co2.xlsx",method="curl")
+
+coal_co2.xlsx<-read_excel("coal_co2.xlsx")
+
+View(coal_co2.xlsx)
 ```
 
 ```{r state gross co2 emission by year}
