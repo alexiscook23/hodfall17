@@ -117,15 +117,51 @@ rmse<-with(compare_data,exp(rmse(cig,pred)));rmse
 
 ```
 
-This model uses the training data (half of the total cex data) to predict cigarette usage with the variables of family size, poverty level, race, grocery spending, and whether or not the family is urban. I originally also has expenditure on alcohol, both in the home and out, as variables but found that they increased the residual error of the model. The RMSE for this model is 1.444 (which can be assessed by taking the exponent of the residual error in the summary or by using the RMSE function). The multiple r-squared shows that this model only accounts for .9% of total prediction for who spends money on cigarettes, so it is still quite ineffective. The t-value is also less than 2, meaning this may actually be equal to zero (there may not be statistical significance). Still, it is the best model I could find based on minimizing RMSE. Based on the model, those in poverty have a postive correlation to buying cigarettes (because the correlation coefficient is negative for "not in poverty"), race2, race4, and race6 have negative correlations to buying cigarettes, and race3, race5, and being an urban family have postive correlation to buying cigarettes.
+This model uses the training data (half of the total cex data) to predict cigarette usage with the variables of family size, poverty level, race, grocery spending, and whether or not the family is urban. I originally also has expenditure on alcohol, both in the home and out, as variables but found that they increased the residual error of the model. The RMSE for this model is 1.444 (which can be assessed by taking the exponent of the residual error in the summary or by using the RMSE function). The multiple r-squared shows that this model only accounts for .9% of total prediction for who spends money on cigarettes, so it is still quite ineffective. The t-value is also less than 2, meaning this may actually be equal to zero (there may not be statistical significance). Still, it is the best model I could find based on minimizing RMSE. Part of its inaccuracy is likely because the variable we are trying to predict, cig, is a binary variaable. Regardless, based on the model those in urban famillies and those in poverty have a postive correlation to buying cigarettes (because the correlation coefficient is negative for "not in poverty"). Race2, race4, and race6 have negative correlations to buying cigarettes, and race3, and race5 have postive correlation to buying cigarettes.
 
 ```{r new dataset for cigarette buyers}
-#cex<-cex%>%mutate(cex_cig<-na.omit(cex$cigarettes))  
-
-cex_cig<-na.omit(cex$cigarettes)                  
+cex_cig<-cex[!(is.na(cex$cigarettes)),]
                   
 View(cex_cig)
 
-##need to figure out how to use predictors from cex dataset to predict with the cex_cig dataset (leftjoin?)
 ```
 
+```{r predict using cex_cig data}
+mod1<-lm(log(cigarettes+1)~
+           fam_size+
+           pov_cym+
+          #log(booze_out+1)+
+          #log(booze_home+1)+
+          ref_race+
+          bls_urbn+
+           log(grocery+1),
+           data=cex_cig,na.action="na.exclude")
+
+summary(mod1)
+
+exp(.7694)
+
+cex_cig<-cex_cig%>%mutate(pred1=predict(mod1))
+
+compare_data<-data.frame(cex_cig$cigarettes,cex_cig$pred1)%>%filter(is.na(cex_cig.pred1)==FALSE)
+names(compare_data)<-c("cigarettes","pred1")
+
+rmse1<-with(compare_data,exp(rmse(log(cigarettes+1),pred1)));rmse1
+
+```
+This model is more accurate in predicting who buys cigarettes, likely because it takes into account the amount spent instead of using a binary variable for spending. The RMSE is 2.14, and the multiple r-squared is .07, meaning this still only accounts for 7% of fluctuation within the model. The t value is still under 2, meaning the correlation could equal zero. Negative correlations between the variables and cigarette spending include family size and every race in the model. Poverty, urban families, and grocery spending all have positive correlations. 
+
+```{r rmse with testing data}
+#mod1_predict<-predict(mod1,newdata=cex_test)
+
+#exp(rmse(mod1_predict,log(cex_test$cigarettes+1)))
+
+
+##can't figure out how to match up the data because cex_test has more columns than cex_cig since I omitted all the columns without data in the cigarette variable for the cex data
+cex_test<-cex_test[!(is.na(cex$cigarettes)),]
+
+cex_cig<-cex_cig%>%mutate(pred2=predict(mod1,newdata=cex_test))
+
+rmse2<-with(cex_test,exp(rmse(log(cigarettes+1),pred2)));rmse2
+
+```
