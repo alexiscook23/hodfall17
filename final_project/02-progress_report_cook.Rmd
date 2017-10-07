@@ -86,3 +86,16 @@ gg
 ```
 
 
+
+
+ COMMENTS from WD
+
+ Okay, looks like there's some confusion here. Recoding to 0,1 is done
+ using mutate(ifelse . . .) . The key graphic you're looking for is a
+ barplot of emissions by regulations, yes? This graphic is not what you
+ want. You need to use left_join() to put the two datasets together,
+ but they need a common id variable, such as state name. The variable
+ for state name has to have the same name in each dataset. Check out
+ the Wickham book, the chapter on relational data, section 13.4 on
+ joins: http://r4ds.had.co.nz/relational-data.html#mutating-joins This
+ will show you how to combine two different datasets.
