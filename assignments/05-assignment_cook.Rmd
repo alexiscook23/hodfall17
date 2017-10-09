@@ -11,7 +11,8 @@ library(tidyverse)
 library(forcats)
 library(ModelMetrics)
 
-load("cex.RData")
+load("../lessons/cex.RData")
+##need to tell R where to find the data (it's in the lessons file instead of the assignments file)
 
 ## Create training and testing datasets
 
