@@ -165,3 +165,8 @@ This model is more accurate in predicting who buys cigarettes, likely because it
 cigs_predict<-predict(mod1,newdata=cex_cig_test)
 exp(rmse(cigs_predict,log(cex_cig_test$cigarettes)))
 ```
+
+
+# COMMENTS from WD
+
+# Good work. Nice job in setting up testing and training correctly.
