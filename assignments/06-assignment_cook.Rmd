@@ -1,0 +1,113 @@
+---
+title: "06-assignment_cook.Rmd"
+output: html_document
+---
+
+```{r}
+
+library(tidyverse)
+library(forcats)
+
+load("cex.RData")
+
+my.vals<-names(cex)
+explanation<-c("id",
+               "education: 10 8th grade, 11 9-12, 12 hs grad,13 some college, 14 assoc, 15 bach 16 masters, 17 prof",
+"education of second person",
+"urban: 1=urban, 2=not",
+"race: 1 white, 2 black, 3 native american, 4 asian 5 pacific islander 6 multi",
+"race of other person",
+"income class: 1: 0-10k, 2 5-10k, 3 10-15k 4 15 to 20k 5 20-30k 6 30-40k 7 40-50k 8 50-70k 9 70k+",
+"inc_rank: percentile rank of income",
+"sex of reference: 1 male 2 female",
+"sex of other person",
+"reference person hispanic? 1 hispanic 2 non",
+"other person hispanic? 1 hispanic 2 non",
+"poverty: 1 below poverty, 2 not",
+"region 1 Ne 2 MW 3 South 4 West",
+"family size: ",
+"family type 1 hw, 2 hw own children, oldest under 6, 3 hw own children oldest 6-17, 4 hw own children oldest over 17, 5 all other hws, 6 one parent male, kids under 18, 7 one parent female, kids under 18, 8 single, 9 other ",
+"Children's ages: 0 no kids, 1 all less 6 2 oldest bt 6 and 11, 3 All children between 6 and 11
+ 4 Oldest child between 12 and 17 and at least one child less than 12
+ 5 All children between 12 and 17
+ 6 Oldest child greater than 17 and at least one child less than 17
+ 7 All children greater than 17 one under 6",
+"quarter and year",
+"Dining out",
+"Grocery",
+"Grocery non-food",
+"Grocery food",
+"Alcohol at home",
+"Alcohol out",
+"Other store expenditures",
+"Cigarrettes",
+"Transportation to work"
+)
+
+codebook<-data.frame(my.vals, explanation)
+
+#View(codebook)
+
+## Quick transformation of income rank
+
+cex<-cex%>%mutate(inc_rank=inc_rank*100)
+```
+
+1. Choose a dependent variable and plot that dependent variable as a function of a continuous independent variable.
+```{r booze at home as a function of income rank}
+g1<-ggplot(data=cex,
+           aes(x=inc_rank,y=(booze_home+1))
+           )
+
+g1<-g1+geom_point() # Add points at x and y
+g1<-g1+geom_smooth(method="lm")
+g1<-g1+xlab("Income Rank")+ylab("Booze at Home")
+g1<-g1+geom_smooth(method=lm) # Add a line
+g1
+
+```
+
+2. If you need to, adjust the scale of either the dependent variable or independent variable to make more sense. 
+3. Add a line of best fit
+4. Clean up the labeling
+Description: this graph shows alcohol spending at home as a function of income rank level. The relationship shows that as income rank increases, alcohol spending at home also increases.
+```{r}
+# Set nice looking breaks, the ones used by ggplot for log transform typically don't work
+my.breaks=c(0,100,500,1000,2500,5000,10000,20000)
+#Change the y scale by taking the log transformation and then making the breaks the ones we just created
+g1<-g1+scale_y_continuous(trans="log",breaks=my.breaks)
+g1<-g1+geom_point() # Add points
+g1<-g1+geom_smooth(method=lm)  #Add a Line
+g1<-g1+ylab("Alcohol Spending at Home")+xlab("Income Percentile (0-100)") #Nice labels
+g1
+
+```
+5. Now, run a regression predicting your outcome as a function of at least two independent variables. 
+```{r}
+#booze at home as a function of income rank and family type
+m1<-lm(log(booze_home+1)~inc_rank+fam_type,data=cex,na.action=na.exclude);summary(m1)
+
+```
+6. Plot your predictions. Make this plot clearly labeled and easy to read.
+```{r}
+#in other words, we're plotting the hypothetical data instead of the actual data
+
+cex$yvar<-cex$booze_home
+cex$xvar1<-cex$inc_rank
+cex$xvar2<-cex$fam_type
+
+mod1<-lm(yvar~xvar1+as.factor(xvar2),data=cex);summary(mod1)
+
+hypo.data<-data.frame(expand.grid(xvar1=seq(min(cex$xvar1,na.rm=TRUE),max(cex$xvar1,na.rm=TRUE),length=100),xvar2=levels(cex$xvar2)))
+
+pred_yvar<-predict(mod1,newdata=hypo.data)
+
+plot_data<-data.frame(hypo.data,pred_yvar)
+
+gg<-ggplot(plot_data,aes(x=xvar1,y=pred_yvar,color=xvar2))
+
+gg<-gg+geom_smooth()
+gg
+
+```
+We took booze at home as a factor of income rank and family type and then created hypothetical data, with income rank as a sequence from 1-100 (from the minimum to the maximum income rank) and family type  into levels. We then plotted this predicted data, with income rank on the x axis, predicted booze spending at home on the y axis, and levels of family type as the colors. The plot shows that predicted spending on booze at home increases as income rank increases, with family type having different overall levels of spending

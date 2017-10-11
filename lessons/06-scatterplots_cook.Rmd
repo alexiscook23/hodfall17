@@ -275,9 +275,11 @@ hypo.data<-data.frame(expand.grid(
           #All levels of childage
           childage=levels(cex$childage)                                     
                                       )
-                          )
+                          ) #so that basically just said go from the minimum of the income rank to the max of income rank in 100 steps, so it just figures out the gap it needs between each and creates that data (doesn't even need to take the average or anything)
 head(hypo.data)
+View(hypo.data)
 ```
+so the above created a new dataset using the existing dataset and it ranked the income levels from 0-100 using every category of childage (so 800 total observations cuz 8 categories of childage)
 
 Now, using my estimates from model 2, I predict what would happen to these hypothetical individuals.  Once I've got my prediction, I transform it back out of the log scale into the "response" level of dollars. 
 
@@ -289,9 +291,11 @@ hypo.pred<-predict(mod2,
                     se.fit=TRUE
                    )
 
+View(hypo.pred)
+
 hypo.data<-data.frame(hypo.data,hypo.pred$fit) #Add fit to the dataset
 hypo.data$groc.p<-exp(hypo.data$fit) #exponentiate fit
-hypo.data$groc.lwr<-exp(hypo.data$lwr) #exponentiate lower boundary
+hypo.data$groc.lwr<-exp(hypo.data$lwr) #exponentiate lower boundary (adds in the lower and upper confidence intervals)
 hypo.data$groc.upr<-exp(hypo.data$upr) #exponentiate upper boundary
 head(hypo.data)
 ```
@@ -306,7 +310,7 @@ g4<-g4+geom_smooth(method=lm,se=FALSE)
 g4<-g4+theme(legend.position="bottom",legend.title = element_blank())
 g4
 ```
-To show this in the data we can break it out for every type of child age grouping. 
+To show this in the data we can break it out for every type of child age grouping. Notice we didn't plot the actual data; we plotted predicted values based on a different dataset that we created
 
 ```{r}
 ## Resort child age for graphic
