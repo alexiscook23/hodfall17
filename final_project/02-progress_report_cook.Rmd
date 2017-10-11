@@ -35,9 +35,22 @@ View(coal_co2_slim)
 
 coal_co2_slim<-coal_co2_slim%>%mutate(percent_change_rank=rank(X__36))
 
+##should figure out how to make a bar chart with states on x axis, ordered by rank of percent change, and the percent change stat on the y axis
+
+#want to do a reorder so that X__36 is ranked with 1 being the lowest change (decreased emissions) and 50 being a high, positive number of percent change emissions
+#want to plot that reorder but use the actual state names instead of the order of the states based on the variable (idk how to change the names)
+#want to change the names of the column titles in my excel data (so I can left-join later on)
+#want to have the y axis data (percent change) done in increments so it's all legible, instead of having every number displayed so that it's all crammed in there
+
+coal_co2_slim$X__36 <- factor(coal_co2_slim$X__36,levels=coal_co2_slim$X__36[order(coal_co2_slim$X__36)])
+
+fct_reorder(coal_co2_slim$X__36)
+
+coal_co2_slim$X__36  
+
 ## Plot by rank
-gg<-ggplot(data=coal_co2 , aes(x=percent_change_rank,
-                         y=X__36))
+gg<-ggplot(data=coal_co2_slim , aes(x=column1, #need to figure out how to say column 1 aka the state names; also need to rename the states to their abbreviation
+                         y=X__36)) +geom_bar(stat="identity")
 ##Add Axis Labels
 gg<-gg+xlab("State Rank")+ylab("Percent Change 1980-2014")
 
