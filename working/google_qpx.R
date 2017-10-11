@@ -12,9 +12,15 @@ my_Key<-"AIzaSyCU7M_n9rRk8E-_NH2nkTAjx38QgZ4B6Xc"
 
 qpx_data<-POST(url, query = list(key = my_Key), body = x, content_type_json(),verbose())
 
-my_trips<-content(qpx_data,as="text")
+my_trip_data<-content(qpx_data,as="text")
 
-my_trips<-my_trips%>%as.tbl_json()
+my_trips<-my_trip_data%>%as.tbl_json()%>%spread_all(json.col)
+
+carrier_data<-my_trips%>%
+  enter_object("carrier")%>%
+  gather_array%>%
+  spread_values(code=jstring("code"))%>%
+  spread_values(carrier_name=jstring("name"))
 
 trip_tidy_a<-my_trips%>%
   enter_object("trips")%>%
