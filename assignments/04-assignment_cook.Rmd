@@ -125,3 +125,9 @@ psid<-read_csv(file=http://users.nber.org/~rdehejia/data/psid_controls.txt)
 
 save(psid,file=psid.Rdata)
 ```
+
+
+# COMMENTS from WD
+
+# Need names for psid dataset, check the assignment followup for how to
+# do this. Otherwise looks good.
