@@ -15,12 +15,6 @@ The code for today starts with the normal set of preliminaries, opening up the `
 
 ```{r,echo=FALSE}
 
-##############################
-# Plotting linear regression
-# Will Doyle 
-# 141006
-##############################
-
 library(tidyverse)
 library(forcats)
 
@@ -123,7 +117,7 @@ This first graphic shows the basic problem with the data, which is the highly no
 
 ```{r}
 g1<-g1+geom_smooth(method="lm")
-g1<-g1+xlab("Grocery Spending")+ylab("Income Rank")
+g1<-g1+ylab("Grocery Spending")+xlab("Income Rank")
 g1
 ```
 
@@ -137,11 +131,12 @@ g1a<-ggplot(cex_sum,aes(x=inc_rank_r,y=groc_mean))
 
 g1a<-g1a+geom_point()
 
-g1a<-g1a+xlab("Grocery Spending")+ylab("Income Rank")
+g1a<-g1a+ylab("Grocery Spending")+xlab("Income Rank")
 
 g1a
 
 ```
+
 
 Better! Simplifying data can help. 
 
@@ -193,7 +188,7 @@ g2<-ggplot(data=cex,
 g2<-g2+scale_y_continuous(trans="log",breaks=my.breaks)
 g2<-g2+geom_point(size=.25)
 g2<-g2+theme(legend.position="bottom"  , legend.title = element_blank())
-g2<-g2+xlab("Grocery Spending")+ylab("Income Rank")
+g2<-g2+ylab("Grocery Spending")+xlab("Income Rank")
 g2
 
 ```
@@ -208,7 +203,7 @@ g2a<-g2a+scale_y_continuous(trans="log",breaks=my.breaks,limits=c(100,8000)) #Ch
 g2a<-g2a+geom_point(size=.25) 
 g2a<-g2a+scale_colour_hue(l=50) #Darker palette
 g2a<-g2a+theme(legend.position = "bottom" , legend.title = element_blank())
-g2a<-g2a+xlab("Grocery Spending")+ylab("Income Rank")
+g2a<-g2a+ylab("Grocery Spending")+xlab("Income Rank")
 g2a
 ```
 
@@ -236,6 +231,8 @@ g3<-g3+xlab("Income Percentile (0-100")+ylab("Grocery Food Spending")
 g3
 ```
 
+
+## Plotting more complex models
 
 As we add more variables to the model, it can get more difficult to plot relationships. One very good option is to plot lines based on a hypothetical set of data. Below, I create a hypothetical set of data that include values of income across the range of income, and includes values for every level of `childage`.
 
@@ -280,8 +277,12 @@ Now we can plot the result, using the `geom_smooth` layer to give us lines for e
 g4<-ggplot(data=hypo.data,aes(x=inc_rank,y=groc.p,color=fct_reorder(f=childage,-groc.p))) #notice color
 g4<-g4+geom_smooth(method=lm,se=FALSE)
 g4<-g4+theme(legend.position="bottom",legend.title = element_blank())
+g4<-g4+xlab("Income Rank",ylab="Predicted Grocery Spending")
 g4
 ```
+
+*Question: Based on our motivating example, where should we be advertising?*
+
 To show this in the data we can break it out for every type of child age grouping. 
 
 ```{r}
