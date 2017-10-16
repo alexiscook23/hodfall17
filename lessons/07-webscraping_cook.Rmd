@@ -226,17 +226,19 @@ simple_data
 
 *Quick Exercise: Add field goals to the above data frame*
 ```{r}
-## Get data frame started: fill in player names
-my_nodes<-paste0(".left:nth-child(",9,")")
+#create a new node with the number for field goals (guessed 9 because it kept showing up when i clicked on it on the website)
+my_nodes<-paste0(".right:nth-child(",9,")")
 
-## This code gets the data !
-player_name<-page%>%
+## This code gets the data 
+field_goals<-page%>%
   html_nodes(my_nodes)%>% #html_nodes helps us pull out the specific parts of the webpage we want
   html_text()
   
-player_name[1:10]
+field_goals[1:10]
 
-simple_data<-tibble(player_name,points)
+simple_data<-tibble(player_name,points,field_goals)
+
+simple_data
 ```
 ## Putting it all together
 
@@ -247,7 +249,7 @@ The code below takes the exact same steps, but expands in two directions. First,
 
 #Check: do you really want to get data?
 
-get_nba_data<-TRUE
+get_nba_data<-TRUE #we can turn this to false later so we don't continually request data from the website
 
 #initialize full dataset
 nba_df_all<-NULL
@@ -255,7 +257,7 @@ nba_df_all<-NULL
 #What years?
 year_list<-1993:2017
 
-if(get_nba_data==TRUE){
+if(get_nba_data==TRUE){ 
 
   ## Loop through years
 for (year in year_list){
