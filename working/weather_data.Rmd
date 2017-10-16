@@ -1,0 +1,70 @@
+---
+title: "Storms"
+author: "Will Doyle"
+date: "October 11, 2017"
+output: github_document
+---
+
+```{r}
+library(tidyverse)
+library(rnoaa)
+library(lubridate)
+library(R.utils)
+```
+
+```{r}
+#NOAA API: Just North American Storms since 2010
+
+sd<-tbl_df(storm_data(basin="NA")) #Takes a while
+
+sd<-sd%>%filter(season%in%c(2000:2017))
+
+sd<-sd%>%select(serial_num,
+                season,
+                name,
+                iso_time,
+                latitude,
+                longitude,
+                wind.wmo..percentile
+                )
+sd<-sd%>%arrange(-wind.wmo..percentile)
+
+head(sd)
+```
+
+
+```{r}
+# From here: https://rpubs.com/roelicaal/NOAA_Storm_Database
+
+if(!file.exists("StormData.csv")) {
+
+
+download.file(url="https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2", destfile="StormData.csv.bz2")
+bunzip2(filename="StormData.csv.bz2", destname="StormData.csv", remove=TRUE)
+        
+}
+
+file <- read_csv("StormData.csv")
+
+df <- select(file, BGN_DATE, STATE, EVTYPE, FATALITIES, INJURIES,
+               PROPDMG,PROPDMGEXP, CROPDMG, CROPDMGEXP)
+
+
+df$BGN_DATE <- as.POSIXct(strptime(df$BGN_DATE,"%m/%d/%Y %H:%M:%S"))
+
+names(df)<-tolower(names(df))
+
+df$year<-year(df$bgn_date)
+
+df<-df%>%filter(year%in%c(2000:2015))
+
+#Total property damage by state and event type
+df_sum<-df%>%group_by(state,year,evtype)%>%
+  summarize(total_prop_dmg=sum(propdmg,na.rm=TRUE))%>%
+  arrange(-total_prop_dmg)
+
+head(df_sum)
+
+```
+
+
