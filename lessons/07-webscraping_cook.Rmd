@@ -399,16 +399,16 @@ save(nba_df_all,file = "nba.Rdata")
 
 Points per minute is one of the key measures of an NBA player's output. Players with points per minute above .6 are considered in the league's elite. The way that players achieve this has changed over time. In particular, players have relied much more on three-point shooting to achieve this benchmark. The graphic below shows points per minute as a function of the number of three pointers scored in a season. In 2001, top producers like Shaquille O'Neal shot no three pointers. By 2015, almost all of the top producers like LeBron James, Steph Curry and Kevin Durant relied on three-point shots as a large part of their production. 
 ```{r}
-nba_df_all<-nba_df_all%>%mutate(pts_minute=pts/minutes_played)
+nba_df_all<-nba_df_all%>%mutate(pts_minute=pts/minutes_played) #this creates a new varialbe that is points per minute
 
-gg<-ggplot(filter(nba_df_all,pts>1000,year>2000),aes(y=pts_minute,x=three_pointers,
+gg<-ggplot(filter(nba_df_all,pts>1000,year>2000),aes(y=pts_minute,x=three_pointers, #this plots only players who scored over 1000 points past the year 2000
                           text=player_name,
                           color=as.factor(year)))
 gg<-gg+geom_hline(yintercept=.6,linetype="dashed",alpha=.3)
 gg<-gg+geom_point(size=.25,alpha=.75)
 gg<-gg+facet_wrap(~year)
 gg<-gg+theme(legend.position="none")
-ggplotly(gg)
+ggplotly(gg) #ggplotly makes the plot interactive
 ```
 
 
@@ -426,11 +426,11 @@ With these keys in hand, we can interact with these various databases. Today, we
 
 ## Zip Code Level Data from the American Community Survey
 
-The first step is to create a list of all zip codes in Davidson County. We can do this by using another dataset that includes a comprehensive listing of zip codes by county and city. 
+The first step is to create a list of all zip codes in Davidson County. We can do this by using another dataset that includes a comprehensive listing of zip codes by county and city.  
 
 ```{r}
 ## Look up fips code for county
-lookup_code("TN","Davidson") 
+lookup_code("TN","Davidson") #this lookup_code command is from tigris (all that matters is that it's a third party thing that'll tell u stuff if you downloaded the package)
 
 state_fips<-"47"
 county_stub<-"037"
