@@ -580,7 +580,7 @@ save(county_df,file="dav.RData")
   load("dav.RData")
 }
 
-View(county_df)
+View(county_df) 
 ```
 
 _Quick Exercise_ Pull table B23001 "Sex by Age by Employment Status for the Population 16 and over" from ACS. 
