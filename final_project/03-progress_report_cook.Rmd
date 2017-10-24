@@ -1,0 +1,86 @@
+```{r  include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(plotly)
+library(gridExtra)
+library(ModelMetrics)
+library(haven)
+library(readxl)
+library(forcats)
+library(RColorBrewer)
+```
+
+For this progress report, I need the following in an .Rmd file:
+
+1. Code that accesses a dataset that contains your dependent variable and most of your relevant independent variables. 
+
+```{r coal state emissions}
+download.file("https://www.eia.gov/environment/emissions/state/excel/coal_CO2_by_state_2014.xlsx",destfile = "coal_co2.xlsx",method="curl")
+
+coal_co2<-read_excel("coal_co2.xlsx")
+
+View(coal_co2)
+
+## Create a rank variable for percent change (excluding unnecessary rows)
+
+coal_co2_slim<-coal_co2[-(c(1,2,11,54:58)),-(c(2:36))]
+coal_co2_slim<-coal_co2_slim%>%mutate(percent_change_rank=rank(`X__36`))
+
+colnames(coal_co2_slim)<-c("State","Percent Change CO2 Emissions 1980-2014","Absolute Change CO2 Emissions 1980-2014","Percent Change Rank")
+
+View(coal_co2_slim)
+
+#open csv file I created with binary for co2 emission cap laws by state
+cap_laws<-read_csv(file="emission_caps.csv")
+
+colnames(cap_laws)<-c("State","Emission Cap Laws")
+cap_laws<-cap_laws[-(c(1)), ]
+
+head(cap_laws)
+
+View(cap_laws)
+
+coal_laws_total<-merge(cap_laws,coal_co2_slim,by="State")
+
+View(coal_laws_total)
+#trying to group states by binary (whether or not they have the law)
+#is there a way to group by response (as in 0 or 1)?
+
+#once i figure this out, can do the same thing with multiple laws using a csv file of binary code for each state
+```
+1. A univaraiate graphic describing the dependent variable.
+ 
+Dependent Variable: CO2 Emissions by State
+Graphic: Rank of State Percent Change in CO2 Emissions from 1980-2014
+----is this the best graphic I can do? Should I focus in on a particular year of change or a particular year of emissions so that it's more focused on potential policy enactment?
+```{r univariate plot}
+
+##should figure out how to make a bar chart with states on x axis, ordered by rank of percent change, and the percent change stat on the y axis (percent change will assumably control for GDP and population)
+
+#want to do a reorder so that percent change is ranked with 1 being the lowest change (decreased emissions) and 50 being a high, positive number of percent change emissions
+#want to plot that reorder but use the actual state names instead of the order of the states based on the variable (idk how to change the names)
+#want to change the names of the column titles in my excel data (so I can left-join later on)
+#want to have the y axis data (percent change) done in increments so it's all legible, instead of having every number displayed so that it's all crammed in there
+
+fct_reorder(coal_laws_total$`Percent Change Rank`,na.rm=TRUE)
+
+## Plot by rank
+gg<-ggplot(data=coal_laws_total , aes(x=State, #need to figure out how to say column 1 aka the state names; also need to rename the states to their abbreviation
+                         y='Percent Change CO2 Emissions 1980-2014') +geom_bar(stat="identity"))
+##Add Axis Labels
+gg<-gg+xlab("State by Rank")+ylab("Percent Change 1980-2014")
+
+## Add Points
+gg<-gg+geom_point(alpha=1,size=.5)
+
+gg
+```
+
+1. Results of two different analyses that predict your dependent variable (conditional means, regression, classification, k-means clustering)
+
+```{r}
+#can run regression on change in state emission level as a function of whether or not they have 2 different laws and then plot like i did for assignment 6
+#can even create a variable that's based on number of laws each state has total regarding co2 emission (so like if California has 30 laws, that'll be their observation etc etc)
+
+```
+1. Two graphics that show the results of your analyses above. 
