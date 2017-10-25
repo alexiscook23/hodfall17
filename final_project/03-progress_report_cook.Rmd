@@ -8,6 +8,7 @@ library(haven)
 library(readxl)
 library(forcats)
 library(RColorBrewer)
+library(rvest)
 ```
 
 For this progress report, I need the following in an .Rmd file:
@@ -39,6 +40,8 @@ cap_laws<-cap_laws[-(c(1)), ]
 View(cap_laws)
 
 coal_laws_total<-merge(cap_laws,coal_co2_slim,by="state")
+
+coal_laws_total>-coal_laws_total%>%mutate(percent_change_emissions=as.numeric(percent_change_emissions)) #this is to recode the emissions variable so that it's numeric (since the next code chunck has an error message about non-numeric variables)... however, it keeps sending an error message about an invalid argument to unary operator
 
 View(coal_laws_total)
 ```
