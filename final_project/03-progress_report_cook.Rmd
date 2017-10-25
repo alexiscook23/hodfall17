@@ -30,7 +30,7 @@ colnames(coal_co2_slim)<-c("state","percent_change_emissions","absolute_change_e
 
 View(coal_co2_slim)
 
-#open csv file I created with binary for co2 emission cap laws by state
+#open csv file I created that has: abbreviation of state name, binary for co2 emission cap laws by state, and investment in renewable energy by state (in USD)
 cap_laws<-read_csv(file="emission_caps.csv")
 
 colnames(cap_laws)<-c("state","abbreviation","emission_cap","renewable_investment")
@@ -41,8 +41,6 @@ View(cap_laws)
 coal_laws_total<-merge(cap_laws,coal_co2_slim,by="state")
 
 View(coal_laws_total)
-
-save(coal_laws_total,file="coal_laws_total.Rdata")
 ```
 1. A univaraiate graphic describing the dependent variable.
  
@@ -50,22 +48,22 @@ Dependent Variable: CO2 Emissions by State
 Graphic: Rank of State Percent Change in CO2 Emissions from 1980-2014
 ```{r univariate plot}
 
-##should figure out how to make a bar chart with states on x axis, ordered by rank of percent change, and the percent change stat on the y axis (percent change will assumably control for GDP and population)
+#create a new variable that is my percent change rank of state in order (1 being the least increase (aka biggest decrease) in c02 emission and 50 being the biggest increase in emissions)
+coal_laws_total>-coal_laws_total%>%mutate(state_sort=fct_reorder(f=coal_laws_total,x=percent_change_rank),ties.method="random")
 
-#want to do a reorder so that percent change is ranked with 1 being the lowest change (decreased emissions) and 50 being a high, positive number of percent change emissions
-#want to plot that reorder but use the actual state names instead of the order of the states based on the variable (idk how to change the names)
-#want to change the names of the column titles in my excel data (so I can left-join later on)
-#want to have the y axis data (percent change) done in increments so it's all legible, instead of having every number displayed so that it's all crammed in there
+coal_laws_total>-coal_laws_total%>%mutate(state_sort=fct_reorder(percent_change_rank),ties.method=random)
 
-coal_laws_total>-coal_laws_total%>%mutate(state_sort=fct_reorder(f=coal_laws_total,x=percent_change_rank))
-                                          
+
+#this is the code for the plot, but it won't let me actually run the code because it says I have a non-numeric argument to the binary operator; I originally assumed it doesn't think the percent change variable is numeric (since I know for sure the rank variable is numeric), but I tested with other variables and get the same error message. Either way, I'm unsure how to change that since I pulled the emission numbers off the EPA website and can't fix them like I could the variables I made in excel                                          
 ## Plot by rank
-gg<-ggplot(data=coal_laws_total,aes(x=state_sort,y=percent_change_emissions) +geom_bar(stat="identity"))
+gg<-ggplot(data=coal_laws_total,aes(x=state_sort,y=percent_change_emissions) +geom_bar())
 ##Add Axis Labels
 gg<-gg+xlab("State by Rank of Change in CO2 Emissions")+ylab("CO2 Emissions Percent Change 1980-2014")
 
 gg<-coord_flip()
-gg<-gg+scale_y_continuous(breaks(c(-4,-3,-2,-1,0,1,2,3,4,5,6,7,8,9,10)))
+
+#add breaks for the emissions data instead of having every numeral from all 50 states
+gg<-gg+scale_y_continuous(breaks=c(-7,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,7,8))
 ## Add Points
 gg<-gg+geom_point(alpha=1,size=.5)
 
@@ -75,16 +73,56 @@ gg
 1. Results of two different analyses that predict your dependent variable (conditional means, regression, classification, k-means clustering)
 
 ```{r}
-#can run regression on change in state emission level as a function of whether or not they have different laws and then plot like i did for assignment 6
-#can even create a variable that's based on number of laws each state has total regarding co2 emission (so like if California has 30 laws, that'll be their observation etc etc)
 
-#can also run a conditional mean of emissions based on emission caps and investment
-
-
+#this is the code for the regression and conditional average, but it won't let me run these either because it says there are non-numeric arguments (same error message as plot)
+#regression of percent change of emissions by state based on that state's investment in renewable energy and the existence of legal state-wide co2 emission caps
 mod<-lm(percent_change_emissions~ 
            log(renewable_investment)+ 
            emission_cap,
          data=coal_laws_total,na.action="na.exclude")
+summary(mod)
+
+#create a variable of the predictions of the regression
+coal_laws_total<-coal_laws_total%>%mutate(pred=predict(mod))
+
+##Condtional Average of percent change in co2 emissions based on 4 levels of investment in renewable energy by state
+## Create a variable for quartiles of investment in renewable energy
+coal_laws_total<-coal_laws_total%>%mutate(investment_level=ntile(renewable_investment,4,na.action="na.exclude"))
+
+table(coal_laws_total$investment_level)
+
+coal_laws_total<-coal_laws_total%>%group_by(investment_level)%>% ## Group by predictor
+  ##Calculate mean at each level of predictor
+  mutate(pred_emission_investment=mean(percent_change_emissions))%>% 
+  ## Ungroup
+  ungroup()%>% 
+  #Rank by prediction, with ties sorted randomly
+  mutate(pred_emission_investment_rank=rank(pred_emission_investment,ties.method="random"))
 
 ```
 1. Two graphics that show the results of your analyses above. 
+
+```{r}
+
+#scatterplot of percent change of emissions based on investment level, with whether or not emission laws exist as the color
+g1<-ggplot(data=coal_laws_total, aes(x=investment_level,y=percent_change_emissions,color=emission_cap)+
+           geom_point(shape=1)+ #specify points
+           geom_smooth(method=lm)) #ask for lm line
+g1
+
+
+#scatterplot of actual percent change emissions versus predicted percent change emissions from the regression
+g2<-ggplot(coal_laws_total, aes(x=percent_change_emissions,y=exp(pred))
++geom_point(shape=1))
+g2
+
+#scatterplot of conditional mean
+gg<-ggplot(data=coal_laws_total,aes(x=pred_emission_investment_rank,y=percent_change_emissions,color="Actual"))
+gg<-gg+geom_point(alpha=.5,size=.5)
+gg<-gg+geom_point(aes(x=pred_emission_investment_rank,y=pred_emission_investment,color="Predicted:Conditional Mean, 1 var"))
+gg<-gg+theme(legend.position="bottom")
+gg<-gg+xlab("Rank")+ylab("Percent Change CO2 Emissions")
+gg
+
+```
+
