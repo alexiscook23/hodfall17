@@ -1,0 +1,6 @@
+---
+title: "notes about my final project"
+output: html_document
+---
+
+can incorporate GDP change as a percentage over 1980-2014, population change as a percent from 1980-2014, fines collected for violation of emission laws by state, number of laws, and existence of coal laws
