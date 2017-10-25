@@ -521,7 +521,7 @@ acs_key<-"6a40376acbf5ba1669c71e128f22503adba853c8"
 # b15002: education of pop over 25, by sex 
 # b19001: household income over last 12 months
 
-get_acs_data<-TRUE
+get_acs_data<-TRUE #set this up so that after you get the data you can turn this to "false" and not have to run this every time cuz it takes awhile
 
 if (get_acs_data==TRUE){
   
@@ -529,16 +529,15 @@ api.key.install(acs_key, file = "key.rda")
 
 select_zip<-geo.make(zip.code=ziplist) #geo.make command puts together a well-formatted request to send to the api (using the dataset we had already created)
 
-county_educ=acs.fetch(geography=select_zip,
+county_educ=acs.fetch(geography=select_zip, #the acs.fetch command is how you communicate with the acs
                       endyear=2014,
                       table.number="B15002",
                       col.names="pretty",verbose=T) #the pretty command just means it'll come back as something intelligible and legible
 
 acs.colnames(county_educ)
 
-## Proportion of individuals at college or above=
-## number with college degree/
-## total number
+## Proportion of individuals at college or above= number with college degree/ total number
+#the ,15 ,16 etc is saying only give me the column of that number (cuz the format is rows then columns so the comma just means no row)
 prop_coll_above<-divide.acs(numerator=(county_educ[,15]+
                                       county_educ[,16]+
                                       county_educ[,17]+
@@ -549,6 +548,7 @@ prop_coll_above<-divide.acs(numerator=(county_educ[,15]+
                                       county_educ[,35]),
                             denominator=county_educ[,1]
 )
+#you can figure out what's in a package by typing the command library(help="that package") and then it'll pull up all the commands you can use. This is major key (Ex: library(help="acs"))
                             
 # 19001-- family income           
 county_income<-acs.fetch(geography=select_zip, 
@@ -586,23 +586,11 @@ View(county_df)
 _Quick Exercise_ Pull table B23001 "Sex by Age by Employment Status for the Population 16 and over" from ACS. 
 ```{r}
 acs_key<-"6a40376acbf5ba1669c71e128f22503adba853c8"
-
-#List of tables: https://www.census.gov/programs-surveys/acs/technical-documentation/summary-file-documentation.html under, 1-year appendices
-# b15002: education of pop over 25, by sex 
-# b19001: household income over last 12 months
-
-get_acs_data<-TRUE #set this up so that after you get the data you can turn this to "false" and not have to run this every time cuz it takes awhile
-
-if (get_acs_data==TRUE){
   
-api.key.install(acs_key, file = "key.rda")
-
-select_zip<-geo.make(zip.code=ziplist) #geo.make command puts together a well-formatted request to send to the api (using the dataset we had already created)
-
 county_empl=acs.fetch(geography=select_zip,
                       endyear=2014,
                       table.number="B23001",
-                      col.names="pretty",verbose=T)} #the pretty command just means it'll come back as something intelligible and legible
+                      col.names="pretty",verbose=T) 
 
 acs.colnames(county_empl)
 
