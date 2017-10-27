@@ -1,0 +1,220 @@
+
+For this assignment, I want you to use the Census ACS API to download and plot data. Complete the following steps:
+```{r}
+library(rvest)
+library(ggthemes)
+library(lubridate)
+library(acs)
+library(noncensus)
+library(leaflet)
+library(tigris)
+options(tigris_use_cache = TRUE) # save tigris shapefiles
+library(plotly)
+library(ggplot2)
+library(forcats)
+library(tidyverse)
+```
+
+
+1. Download data for all of the zip codes in Los Angeles county on education levels. 
+2. Compute the proportion of the population that has a bachelor's degree or above by zip code.
+3. Download data for all of the zip codes in LA county on family income by zip code. 
+4. Compute the proportion of the population that has family income above 75,000. 
+
+```{r}
+## Look up fips code for county
+lookup_code("CA","Los Angeles") 
+
+state_fips<-"06"
+county_stub<-"037"
+county_fips<-paste0(state_fips,county_stub)
+
+# Get dataset that matches all zip codes to cities, counties and states. 
+county_to_zip<-read_csv("http://www2.census.gov/geo/docs/maps-data/data/rel/zcta_county_rel_10.txt")
+
+#easier names to work with
+names(county_to_zip)<-tolower(names(county_to_zip))
+
+#Just zip codes in selected county
+county_to_zip<-county_to_zip%>%filter(state==state_fips,county==county_stub)%>%
+  select(zcta5,state,county)
+
+#list of zip codes
+ziplist<-county_to_zip$zcta5
+
+#City names
+data(zip_codes)
+
+city_zip<-zip_codes%>%filter(zip%in%ziplist)%>%select(zip,city)
+
+#Arrange in order
+city_zip<-city_zip%>%arrange(as.numeric(zip))
+
+city_zip
+```
+```{r}
+#my acs key
+acs_key<-"6a40376acbf5ba1669c71e128f22503adba853c8"
+
+#List of tables: https://www.census.gov/programs-surveys/acs/technical-documentation/summary-file-documentation.html under, 1-year appendices
+# b15002: education of pop over 25, by sex 
+# b19001: household income over last 12 months
+
+get_acs_data<-TRUE #set this up so that after you get the data you can turn this to "false" and not have to run this every time cuz it takes awhile
+
+if (get_acs_data==TRUE){
+  
+api.key.install(acs_key, file = "key.rda")
+
+select_zip<-geo.make(zip.code=ziplist) 
+
+county_educ=acs.fetch(geography=select_zip, 
+                      endyear=2014,
+                      table.number="B15002",
+                      col.names="pretty",verbose=T) 
+
+acs.colnames(county_educ)
+
+## Proportion of individuals with or above Bachelor's= number with college degree/ total number
+#the ,15 ,16 etc is saying only give me the column of that number (cuz the format is rows then columns so the comma just means no row)
+prop_coll_above<-divide.acs(numerator=(county_educ[,15]+
+                                      county_educ[,16]+
+                                      county_educ[,17]+
+                                      county_educ[,18]+ #this makes the numerator all the males and females and the denominator is total number in county
+                                      county_educ[,32]+
+                                      county_educ[,33]+
+                                      county_educ[,34]+
+                                      county_educ[,35]),
+                            denominator=county_educ[,1]
+)
+
+                            
+# 19001-- family income           
+county_income<-acs.fetch(geography=select_zip, 
+                        endyear = 2015,
+                        table.number="B19001", 
+                        col.names="pretty")
+
+acs.colnames(county_income)
+
+#Proportion above 75k-- 
+prop_above_75<-divide.acs(numerator=(county_income[,13]+
+                            county_income[,14]+
+                            county_income[,15]+
+                            county_income[,16]+
+                            county_income[,17]),
+                          denominator=county_income[,1]
+                          )
+                          
+# Convert to tibble
+county_df<-tibble(substr(geography(county_educ)[[1]],7,11),
+                       as.numeric(estimate(prop_coll_above)),
+                       as.numeric(estimate(prop_above_75))
+) #keep in mind that these are estimates and not exact, so it's worth checking if you're working with a really small geographical area (not as big a worry if it's a big area)
+
+# Give it easy to use names
+names(county_df)<-c("zip","college_educ","income_75")
+save(county_df,file="dav.RData")
+}else{
+  load("dav.RData")
+}
+
+View(county_df) 
+```
+
+
+5. Download data for all of the zip codes in LA county on health insurance coverage status (you'll need to look that table up here:[http://www.census.gov/programs-surveys/acs/technical-documentation/summary-file-documentation.html](http://www.census.gov/programs-surveys/acs/technical-documentation/summary-file-documentation.html).
+6. Calculate the proportion of the population in each zip code that is uninsured. 
+```{r}
+#my acs key
+acs_key<-"6a40376acbf5ba1669c71e128f22503adba853c8"
+
+get_acs_data<-TRUE #set this up so that after you get the data you can turn this to "false" and not have to run this every time cuz it takes awhile
+
+if (get_acs_data==TRUE){
+  
+api.key.install(acs_key, file = "key.rda")
+
+select_zip<-geo.make(zip.code=ziplist) 
+
+county_insur=acs.fetch(geography=select_zip, 
+                      endyear=2014,
+                      table.number="B27001", #health insurance by sex by age
+                      col.names="pretty",verbose=T) 
+
+acs.colnames(county_insur)
+
+## Proportion of individuals without insurance
+prop_uninsured<-divide.acs(numerator=(county_educ[,15]+
+                                      county_educ[,16]+
+                                      county_educ[,17]+
+                                      county_educ[,18]+ 
+                                      county_educ[,32]+
+                                      county_educ[,33]+
+                                      county_educ[,34]+
+                                      county_educ[,35]),
+                            denominator=county_educ[,1]
+)
+
+
+# Convert to tibble
+county_un<-tibble(substr(geography(county_insur)[[1]],7,63),
+                       as.numeric(estimate(prop_uninsured))
+) 
+
+# Give it easy to use names
+names(county_un)<-c("zip","uninsured")
+save(county_un,file="insur.RData")
+}else{
+  load("insur.RData")
+}
+
+View(county_un) 
+```
+
+
+7. Plot the proportion uninsured as a function of education, and then as a function of income. 
+```{r education}
+#Merge  datasets
+zip_df_un<-left_join(county_df,county_un,by="zip")
+zip_df_un<-left_join(zip_un,city_zip,by="zip")
+
+#Bar plot of uninsured by education
+g6<-ggplot(zip_df_un,
+           aes(x=fct_reorder(as.factor(college_educ),uninsured),y=uninsured,fill=uninsured,text=city))
+
+g6<-g6+scale_fill_gradient(low="blue",high="red")
+
+g6<-g6+geom_bar(stat="identity")
+
+g6<-g6+xlab("Proportion of Residents with College Degree")+ylab("Proportion of Uninsured")
+
+g6<-g6+theme(legend.position="none")
+
+g6
+
+```
+```{r income}
+#Bar plot of uninsured by income
+g6<-ggplot(zip_df_un,
+           aes(x=income_75,y=uninsured,fill=uninsured,text=city))
+
+g6<-g6+scale_fill_gradient(low="blue",high="red")
+
+g6<-g6+geom_bar(stat="identity")
+
+g6<-g6+xlab("Proportion of Residents with Income>75K")+ylab("Proportion of Uninsured")
+
+g6<-g6+theme(legend.position="none")
+
+g6
+
+```
+8. Model the proportion uninsured as a function of education, income _and one other variable of your choice_. 
+
+```{r}
+
+#Predict uninsured by income and education
+mod1<-lm(uninsured~college_educ+income_75,data=zip_df_un);summary(mod1)
+
+```
