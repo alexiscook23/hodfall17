@@ -76,11 +76,10 @@ county_educ=acs.fetch(geography=select_zip,
 acs.colnames(county_educ)
 
 ## Proportion of individuals with or above Bachelor's= number with college degree/ total number
-#the ,15 ,16 etc is saying only give me the column of that number (cuz the format is rows then columns so the comma just means no row)
 prop_coll_above<-divide.acs(numerator=(county_educ[,15]+
                                       county_educ[,16]+
                                       county_educ[,17]+
-                                      county_educ[,18]+ #this makes the numerator all the males and females and the denominator is total number in county
+                                      county_educ[,18]+ 
                                       county_educ[,32]+
                                       county_educ[,33]+
                                       county_educ[,34]+
@@ -124,6 +123,7 @@ View(county_df)
 
 
 5. Download data for all of the zip codes in LA county on health insurance coverage status (you'll need to look that table up here:[http://www.census.gov/programs-surveys/acs/technical-documentation/summary-file-documentation.html](http://www.census.gov/programs-surveys/acs/technical-documentation/summary-file-documentation.html).
+
 6. Calculate the proportion of the population in each zip code that is uninsured. 
 ```{r}
 #my acs key
@@ -144,21 +144,31 @@ county_insur=acs.fetch(geography=select_zip,
 
 acs.colnames(county_insur)
 
-## Proportion of individuals without insurance
-prop_uninsured<-divide.acs(numerator=(county_educ[,15]+
-                                      county_educ[,16]+
-                                      county_educ[,17]+
-                                      county_educ[,18]+ 
-                                      county_educ[,32]+
-                                      county_educ[,33]+
-                                      county_educ[,34]+
-                                      county_educ[,35]),
-                            denominator=county_educ[,1]
+## Proportion of individuals without insurance (uninsured all ages male and female over total)
+prop_uninsured<-divide.acs(numerator=(county_insur[,5]+
+                                      county_insur[,8]+
+                                      county_insur[,11]+
+                                      county_insur[,14]+ 
+                                      county_insur[,17]+
+                                      county_insur[,20]+
+                                      county_insur[,23]+
+                                      county_insur[,26]+
+                                      county_insur[,29]+
+                                      county_insur[,33]+
+                                      county_insur[,36]+
+                                      county_insur[,39]+
+                                      county_insur[,42]+
+                                      county_insur[,45]+
+                                      county_insur[,48]+
+                                      county_insur[,51]+
+                                      county_insur[,54]+
+                                      county_insur[,57]),
+                            denominator=county_insur[,1]
 )
 
 
 # Convert to tibble
-county_un<-tibble(substr(geography(county_insur)[[1]],7,63),
+county_un<-tibble(substr(geography(county_insur)[[1]],7,57),
                        as.numeric(estimate(prop_uninsured))
 ) 
 
@@ -213,8 +223,40 @@ g6
 8. Model the proportion uninsured as a function of education, income _and one other variable of your choice_. 
 
 ```{r}
+#get data about employment status in these zip codes
+acs_key<-"6a40376acbf5ba1669c71e128f22503adba853c8"
 
-#Predict uninsured by income and education
-mod1<-lm(uninsured~college_educ+income_75,data=zip_df_un);summary(mod1)
+get_acs_data<-TRUE #set this up so that after you get the data you can turn this to "false" and not have to run this every time cuz it takes awhile
+
+if (get_acs_data==TRUE){
+  
+api.key.install(acs_key, file = "key.rda")
+
+select_zip<-geo.make(zip.code=ziplist) 
+
+county_empl=acs.fetch(geography=select_zip, 
+                      endyear=2014,
+                      table.number="B27011", #health insurance by employment status
+                      col.names="pretty",verbose=T) 
+
+acs.colnames(county_empl)
+
+# Convert to tibble
+county_job<-tibble(substr(geography(county_empl)[[1]],2,35)
+) 
+
+# Give it easy to use names
+names(county_job)<-c("zip","employment")
+save(county_job,file="job.RData")
+}else{
+  load("job.RData")
+}
+
+View(county_job) 
+
+zip_df_un<-left_join(zip_df_un,county_job,by="zip")
+
+#Predict uninsured by income and education and employment status
+mod1<-lm(uninsured~college_educ+income_75+county_empl,data=zip_df_un);summary(mod1)
 
 ```
