@@ -111,6 +111,7 @@ za_expand<-za%>%
 
 ## What this looks like
 za_expand%>%select(word)
+
 ```
 
 Next, we drop what are called ["stop words"](https://en.wikipedia.org/wiki/Stop_words): words unlikely to have content that we are interested in. 
@@ -316,7 +317,7 @@ logit_mod<-glm(got_pizza~ #glm is generalized linear model; the formula works th
 summary(logit_mod)
 ```
 
-With these results in hand we can generate predicted probabilities and see if this model did any better. To get predicted probabilities
+With these results in hand we can generate predicted probabilities and see if this model did any better. To get predicted probabilities do this command below
 
 ```{r}
 logit_predict<-predict(logit_mod,type="response")
@@ -327,6 +328,7 @@ We can convert the predictions to a binary variable by setting a "threshold" of 
 logit_predict_bin<-rep(0,length(logit_predict))
 
 logit_predict_bin[logit_predict>=.5]<-1
+#if you wanted to increase the sensitivity of your model, just change the model (being classified as a 1 could be based on anything above .2 or something)
 
 logit_table<-table(logit_predict_bin,za$got_pizza)
 

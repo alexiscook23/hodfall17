@@ -456,6 +456,8 @@ names(city_zip)<-c("zip","city")
 
 #Arrange in order
 city_zip<-city_zip%>%arrange(as.numeric(zip))
+
+city_zip
 ```
 
 
