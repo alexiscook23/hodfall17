@@ -61,6 +61,16 @@ gg<-ggplot(final_data,aes(x=price))
 gg<-gg+geom_density()
 gg
 
+reg1<-lm(price~as.factor(carrier),data=final_data)
 
+coal_loss_total<-coal_loss_total%>%
+  mutate(state_sort=fct_reorder(f=state,x=percent_change))
+
+df$var<-as.numeric(df$var)
+
+gg<-ggplot(coal_loss_total,aes(x=state,y=percent_change))
+gg<-gg+geom_bar()
+gg<-coord_flip()
+gg<-gg+scale_y_continuous(breaks=c(-5,0,5,10))
 
 

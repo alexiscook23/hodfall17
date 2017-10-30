@@ -111,3 +111,9 @@ gg
 
 ```
 We took booze at home as a factor of income rank and family type and then created hypothetical data, with income rank as a sequence from 1-100 (from the minimum to the maximum income rank) and family type  into levels. We then plotted this predicted data, with income rank on the x axis, predicted booze spending at home on the y axis, and levels of family type as the colors. The plot shows that predicted spending on booze at home increases as income rank increases, with family type having different overall levels of spending
+
+
+## COMMENTS from WD
+
+## Review the key for how to predict against hypothetical data. Otherwise
+## good.

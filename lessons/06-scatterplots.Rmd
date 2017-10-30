@@ -1,8 +1,4 @@
----
-title: "Scatterplots"
-author: "Will Doyle"
-output: github_document
----
+# Scatterplots {#scatterplots}
 
 Scatterplots are the best way to present data that has a continuous response variable. When creating scatterplots, the idea is to show ALL of the data, and then show how your model is summarizing the relationships in that data. 
 
