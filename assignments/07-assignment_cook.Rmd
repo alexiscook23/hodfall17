@@ -168,7 +168,7 @@ prop_uninsured<-divide.acs(numerator=(county_insur[,5]+
 
 
 # Convert to tibble
-county_un<-tibble(substr(geography(county_insur)[[1]],7,57),
+county_un<-tibble(substr(geography(county_insur)[[1]],7,11),
                        as.numeric(estimate(prop_uninsured))
 ) 
 
@@ -242,8 +242,8 @@ county_empl=acs.fetch(geography=select_zip,
 acs.colnames(county_empl)
 
 # Convert to tibble
-county_job<-tibble(substr(geography(county_empl)[[1]],2,35)
-) 
+county_job<-tibble(substr(geography(county_empl)[[1]],7,11)
+) #the 7-11 is where the zipcode is (so that R reads the zipcode and not all the other stuff)
 
 # Give it easy to use names
 names(county_job)<-c("zip","employment")

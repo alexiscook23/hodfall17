@@ -503,6 +503,8 @@ city_zip<-zip_codes%>%filter(zip%in%ziplist)%>%select(zip,city)
 
 #Arrange in order
 city_zip<-city_zip%>%arrange(as.numeric(zip))
+
+city_zip
 ```
 
 Next, we'll turn to the American Community Survey. This includes a large number of tables (available `http://www2.census.gov/acs2011_3yr/summaryfile/ACS_2009-2011_SF_Tech_Doc.pdf`) that cover many demographic and other characteristics of the population, down to the level of zip codes. We'll use the acs package to get two tables for the zip codes we're interested in: levels of education and income. We'll turn these tables into two variables: the proportion of the population with incomes above $75,000, and the proportion of the population with at least a bachelor's degree. 
@@ -571,7 +573,7 @@ prop_above_75<-divide.acs(numerator=(county_income[,13]+
 county_df<-tibble(substr(geography(county_educ)[[1]],7,11),
                        as.numeric(estimate(prop_coll_above)),
                        as.numeric(estimate(prop_above_75))
-)
+) #the 7-11 is where the zipcode is (so that R reads the zipcode and not all the other stuff)
 
 # Give it easy to use names
 names(county_df)<-c("zip","college_educ","income_75")
@@ -707,7 +709,7 @@ g6<-g6+geom_bar(stat="identity")+coord_flip()
 g6<-g6+xlab("")+ylab("Median Value per Square Foot, Nashville Neighborhoods")
 
 g6<-g6+theme(legend.position="none")
-
+g6
 ggplotly(g6)
 ```
 
