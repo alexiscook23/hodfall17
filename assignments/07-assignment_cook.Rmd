@@ -191,7 +191,7 @@ zip_df_un<-left_join(zip_un,city_zip,by="zip")
 
 #Bar plot of uninsured by education
 g6<-ggplot(zip_df_un,
-           aes(x=fct_reorder(as.factor(college_educ),uninsured),y=uninsured,fill=uninsured,text=city))
+           aes(x=fct_reorder(as.factor(college_educ),uninsured),y=uninsured,fill=uninsured))
 
 g6<-g6+scale_fill_gradient(low="blue",high="red")
 
@@ -207,7 +207,7 @@ g6
 ```{r income}
 #Bar plot of uninsured by income
 g6<-ggplot(zip_df_un,
-           aes(x=income_75,y=uninsured,fill=uninsured,text=city))
+           aes(x=income_75,y=uninsured,fill=uninsured))
 
 g6<-g6+scale_fill_gradient(low="blue",high="red")
 
