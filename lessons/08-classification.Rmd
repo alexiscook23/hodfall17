@@ -67,7 +67,7 @@ za<-za%>%mutate(prev_raop_post=ifelse(raop_posts>0,1,0))%>%
                                      "Posted Before"="1"))
 
 # Binary variable: word "student" in text
-za<-za%>%mutate(student=ifelse(grepl(x=request_text,pattern="student"),1,0))%>% #grepl command turns the texts into binary based on content; if the text ever said the word "student" then it'll get a 1 (doesn't mean that person is a student, just means they said the word)
+za<-za%>%mutate(student=ifelse(grepl(x=request_text,pattern="student"),1,0))%>%
         mutate(student=fct_recode(as.factor(student),
                             "Student"="1",
                             "No student"="0"))
@@ -78,7 +78,7 @@ za$words<-str_count(za$request_text,"\\S+")
 
 # Binary variable: word "poor" or "money" in text
 
-za<-za%>%mutate(poor=ifelse(grepl(x=request_text,pattern="poor"),1,0))%>% 
+za<-za%>%mutate(poor=ifelse(grepl(x=request_text,pattern="poor"),1,0))%>%
   mutate(poor=fct_recode(as.factor(poor),
                 "Poor in post"="1",
                 "Poor not in post"="0"))
@@ -118,7 +118,6 @@ Next, we drop what are called ["stop words"](https://en.wikipedia.org/wiki/Stop_
 ```{r}
 ## Drop known stop words
 za_expand<-za_expand%>%anti_join(stop_words,by="word")  
-#anti_join says from our expanded dataframe, drop every word that was one of our stop words
 
 ## What this looks like
 za_expand%>%select(word)
@@ -137,8 +136,6 @@ za_expand<-za_expand%>%left_join(sentiments,by="word")
 ##Missing=0
 za_expand<-za_expand%>%
   mutate(score=ifelse(is.na(score),0,score))
-#if there's no sentiment one way or the other, it gets a zero. Otherwise, -4 will be very negative and 4 will be very positive
-
 
 ## Show words and scores
 za_expand%>%select(word,score)
@@ -153,7 +150,6 @@ Now we're ready to bring this back in. We'll sum up the scores for each post to 
 ## Sum score per post
 za_sum<-za_expand%>%group_by(request_id)%>%
   summarize(score=sum(score))
-#this summarizes each request_id by adding up all the positive and negative scores 
 
 za_sum%>%select(request_id,score)%>%print()
 ```
@@ -197,7 +193,6 @@ Next, if the request mentioned the word "grateful."
 g_table<-table(za$grateful,za$got_pizza);g_table
 
 prop.table(g_table,margin=1)
-#the mean of a binary variable is the same as the proportion of the population who has that characteristic (so getting pizza means 1 and not is 0, so when .75 are a 0 and .25 are a 1, that's the proportions of who got pizza and who didn't)
 ```
 
 Crosstabs using binary data are equivalent to generating conditional means, as shown below. 
@@ -215,7 +210,7 @@ But, we can also use conditional means to get proportions for very particular se
 
 za%>%group_by(grateful,student)%>%summarize(mean(got_pizza))
 
-za_sum<-za%>%group_by(grateful,student,poor)%>%summarize(mean_pizza=mean(got_pizza)) #of those who said grateful and student in the post, 47% actually got pizza
+za_sum<-za%>%group_by(grateful,student,poor)%>%summarize(mean_pizza=mean(got_pizza))
 
 za_sum
 
@@ -238,13 +233,14 @@ We can use standard OLS regression for classification. It's not ideal, but most 
 
 lm_mod<-lm(got_pizza~
              age+
-             karma+ #karma is upvotes minus downvotes
-             log(total_posts+1)+ #how many times this user posted on reddit; it's an exponential scale because of the variation in people posting
+             karma+
+             log(total_posts+1)+
              raop_posts+
+             karma+
              student+
              grateful+
              pop_request+
-             score, #the regression summary shows that the sentiment score actually has almost zero effect on whether or not the user actually got pizza
+             score,
            data=za,y=TRUE,na.exclude=TRUE);summary(lm_mod)
 ```
 
@@ -257,13 +253,10 @@ We're going to do something a bit different with the predictions from this model
 lm_predict<-predict(lm_mod)
 
 ## Convert to binary, 1= >.5
-lm_predict_bin<-ifelse(lm_predict>.5,1,0) #turn this into a binary variable by saying if the probability is above .5, it gets a 1 (otherwise it gets a 0)
-
-lm_predict_bin #this prediction shows that very few people will actually get pizza (of the thousands of posters, only about 72 will get the pizza)
+lm_predict_bin<-ifelse(lm_predict>.5,1,0)
 
 ## Table of actual vs. predicted, what's going on here?
 lm_table<-table(lm_predict_bin,lm_mod$y)
-#this should really concern us because the matrix of actual pizza receivers versus not shows that 1324 actually got pizza... wayyy more than we predicted (the first row is what actually happened and the second is our prediction)
 
 ## Percent correctly predicted
 pcp<-(lm_table[1,1]+lm_table[2,2])/sum(lm_table)
@@ -276,18 +269,14 @@ colnames(pred_table)<-c("Actual: Yes","Actual: No")
 ## Generate confusion matrix
 confusionMatrix(data=lm_predict_bin,
                 reference = lm_mod$y,positive="1")
-#a confusion matrix is classifying what your predication says will happen against what actually happened
 ```
-so the sensitivity and specificity are just the predictions divided by the actual results (our 0 over the real 0 is specificity and vice versa). our model is really good at specificity and horrible at sensitivity
 
 The confusion matrix generated here is explained [here](https://topepo.github.io/caret/measuring-performance.html#class). 
 
 We're usually interested in three things: the overall accuracy of a classification is the proportion of cases accurately classified. The sensitivity is the proportion of "ones" that are accurately classified as ones-- it's the probability that a case classified as positive will indeed be positive. Specificity is the probability that a case classified as 0 will indeed by classified as 0. 
---they're complementary; you need a balance (it depends on what you're trying to do as to how you'd prefer to lean; if you're looking at the likelihood of getting a disease with minimally invasive treatment, you'd prefer to be overly sensitive. you'll get some false positives but also save lives)
 
-*Question: how do you get perfect specificity? How do you get
+*Question: how do you get perfect specificity? How do you get 
 perfect sensitivity?*
---so if you wanted 100% specificity, you'd just make everything a 0. 
 
 There are several well-known problems with linear regression as a classification algortihm. Two should give us pause: it can generate probabilites outside of 0,1 and it implies a linear change in probabilities as a function of the predictors which may not be justified given the underlying relationship between the predictors and the probability that the outcome is 1. Logistic regresssion should give a better predicted probability, one that's more sensitive to the actual relationship between the predictors and the outcome. 
 
@@ -298,7 +287,7 @@ Logistic regression is set up to handle binary outcomes as the dependent variabl
 ```{r}
 #Logisitic model
 
-logit_mod<-glm(got_pizza~ #glm is generalized linear model; the formula works the same way, but we have to specify what family at the end. our outcome is binary so it's binomial, and logit is the type of model
+logit_mod<-glm(got_pizza~
               age+
              karma+
              log(total_posts+1)+
@@ -306,7 +295,7 @@ logit_mod<-glm(got_pizza~ #glm is generalized linear model; the formula works th
              karma+
              student+
              grateful+
-             pop_request+ #pop_request is the total number of upvotes
+             pop_request+
              score,
              data=za,
             na.action=na.exclude,
