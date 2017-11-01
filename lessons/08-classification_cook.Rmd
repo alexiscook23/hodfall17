@@ -278,6 +278,7 @@ colnames(pred_table)<-c("Actual: Yes","Actual: No")
 confusionMatrix(data=lm_predict_bin,
                 reference = lm_mod$y,positive="1")
 #a confusion matrix is classifying what your predication says will happen against what actually happened
+#these models are used by the military to predict terrorists, marketing companies to advertise to you correctly based on what you're likely interested in etc
 ```
 so the sensitivity and specificity are just the predictions divided by the actual results (our 0 over the real 0 is specificity and vice versa). our model is really good at specificity and horrible at sensitivity
 
@@ -352,11 +353,11 @@ logit_predict_no_na<-na.omit(logit_predict)
 
 logit_roc<-roc(logit_predict_no_na,as.factor(logit_mod$y))
 
-auc(logit_roc)
+auc(logit_roc) #this command (area under curve) tells us the area
  
 plot(logit_roc)
 ```
-
+So this model shows our sensitivity versus our specificity; to be a perfect model you'd have an area of one (it'd go straight up and straight over meaning it's perfectly sensitive and specific)... ours is .6; that's pretty bad. It goes like letter grades, so we basically got a D-
 ## Plotting Predicted Probability
 
 Plots of binary models can be weird. To help with this, we can "jitter" the plot to add some random noise. 
