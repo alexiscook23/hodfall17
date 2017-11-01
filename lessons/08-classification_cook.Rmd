@@ -373,7 +373,7 @@ gg<-ggplot(za_preds,aes(x=karma,y=got_pizza))
 gg<-gg+geom_jitter(alpha=.25,size=.5,position=position_jitter(height=.4,width=.4))
 gg<-gg+scale_x_continuous(trans="log",breaks=c(0,10,100,1000,3000,10000))
 gg<-gg+geom_smooth(data=za_preds,aes(x=karma,y=predict,color=as.factor(student)))
-gg
+gg 
 
 ```
 
