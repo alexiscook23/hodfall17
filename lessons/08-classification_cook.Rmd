@@ -138,7 +138,7 @@ za_expand<-za_expand%>%left_join(sentiments,by="word")
 ##Missing=0
 za_expand<-za_expand%>%
   mutate(score=ifelse(is.na(score),0,score))
-#if there's no sentiment one way or the other, it gets a zero. Otherwise, -4 will be very negative and 4 will be very positive
+#if there's no sentiment one way or the other, it gets a zero. Otherwise, it's a scale -4 to 4 where -4 will be very negative and 4 will be very positive
 
 
 ## Show words and scores

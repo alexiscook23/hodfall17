@@ -1,14 +1,78 @@
 Classification: Kaggle Competititon, Part Deux
 ---
 
-Today, we'll be again working in paris on a Kaggle competition to predict who gets pizza. Using the pizza dataset, find the best fit to the data. However, to qualify as a winner, you need to do the following: 
+Today, we'll be again working in pairs on a Kaggle competition to predict who gets pizza. Using the pizza dataset, find the best fit to the data. However, to qualify as a winner, you need to do the following: 
 
+```{r libraries}
+library(tidyverse)
+library(knitr)
+library(caret)
+library(forcats)
+library(tidytext)
+library(stringr)
+library(AUC)
+```
+```{r}
+za_train<-read.csv("za_train.csv")
+save(za_train,file="za_train.Rdata")
+
+za_test<-read.csv("za_test.csv")
+save(za_test,file="za_test.Rdata")
+```
 1. Fit a model using logistic regression using the training dataset (pizza_train.csv).
+```{r}
+View(za_train)
+#Logisitic model
+
+za_test<-za_test%>%mutate(favor=ifelse(grepl(x=request_text,pattern="favor"),1,0))%>% 
+  mutate(favor=fct_recode(as.factor(favor),
+                "Favor in post"="1",
+                "Favor not in post"="0"))
+
+za_train<-za_train%>%mutate(favor=ifelse(grepl(x=request_text,pattern="favor"),1,0))%>% 
+  mutate(favor=fct_recode(as.factor(favor),
+                "Favor in post"="1",
+                "Favor not in post"="0"))
+
+#can see how common the word you're testing is
+table(za$favor)
+prop.table(table(za$favor))
+
+logit_mod<-glm(got_pizza~ #glm is generalized linear model; the formula works the same way, but we have to specify what family at the end. our outcome is binary so it's binomial, and logit is the type of model
+             age+
+             karma+
+             log(total_posts+1)+
+             raop_posts+
+             karma+
+             student+
+             grateful+
+             pop_request+ 
+             favor+
+             score,
+             data=za_train,
+            na.action=na.exclude,
+            family=binomial(link="logit"),
+               y=TRUE)
+
+summary(logit_mod)
+```
+
 
 2. Compute the predictions from your model from the testing dataset (pizza_test.csv). 
+3. Calculate the AUC (from the Receiver Operating Characteristic) for the predictions from your model from the testing dataset (za_test.csv). 
+4. Find a way to plot the predictions from your model.
+```{r}
+logit_predict<-predict(logit_mod,newdata=za_test,type="response")
 
-3. Calculate the AUC (from the Receiver Operating Characteristic) for the predictions from your model from the testing dataset (pizza_test.csv). 
+logit_predict_no_na<-na.omit(logit_predict)
 
-4. Find a way to plot the predictions from your model. 
+logit_roc<-roc(logit_predict_no_na,as.factor(logit_mod$y))
+
+auc(logit_roc) #this command (area under curve) tells us the area
+ 
+plot(logit_roc)
+```
+
+ 
 
 For some ideas, see: http://cs.stanford.edu/~althoff/raop-dataset/altruistic_requests_icwsm.pdf.
