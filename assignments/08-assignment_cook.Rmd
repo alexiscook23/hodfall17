@@ -9,12 +9,128 @@ https://www.kaggle.com/c/DontGetKicked/data. Your job is to predict which cars a
 Complete the following steps.
 **you don't have to do all the wrangling or the sentiment analysis. Just table dependent variable and table depedent variable by make, run a linear model, run an AUC on the linear model, run a logistic regression and calculate AUC for that logit model. No testing and training datasets either. 
 
+```{r libraries}
+library(tidyverse)
+library(knitr)
+library(caret)
+library(forcats)
+library(tidytext)
+library(stringr)
+library(AUC)
+```
+
+```{r data}
+lem_test<-read_csv("lem_test.csv")
+lem_train<-read_csv("lem_train.csv")
+
+View(lem_train)
+```
 1. Calculate the proportion of lemons in the training dataset using the `IsBadBuy` variable. (table)
+```{r}
+lem_train%>%
+  count(IsBadBuy)%>% 
+  mutate(p=prop.table(n))%>% #mutate for proportions using prop.table
+  kable(format="markdown") # output to table
+
+#12.3% of vehicles in the training dataset are lemons
+```
 2. Calculate the proportion of lemons by Make. (proportions table by make)
+```{r by make}
+#Predictions using conditional means
+
+lem_train%>%group_by(Make)%>%summarize(mean(IsBadBuy))
+```
+
+
 3. Now, predict the probability of being a lemon using a linear model (`lm(y~x`), with covariates of your choosing from the training dataset. 
+```{r linear_model}
+# Linear model
+
+lm_mod<-lm(IsBadBuy~
+             VehYear+
+             VehicleAge+ 
+             Make+ 
+             Nationality+
+             logit_predict+ #added the logit_predict variable in
+             WarrantyCost,
+           data=lem_train,y=TRUE,na.exclude=TRUE);summary(lm_mod)
+```
+
 4. Make predictions from the linear model.
+```{r}
+#Predictions
+
+## Linear model predictions
+lm_predict<-predict(lm_mod)
+
+## Convert to binary, 1= >.5
+lm_predict_bin<-ifelse(lm_predict>.1,1,0) #made it .1 because my model was incredibly sensitive but not very specific at first (was classifying everyone as a 1 when the prediction is above a .1)
+
+lm_predict_bin 
+
+## Table of actual vs. predicted, what's going on here?
+lm_table<-table(lm_predict_bin,lm_mod$y)
+
+## Percent correctly predicted
+pcp<-(lm_table[1,1]+lm_table[2,2])/sum(lm_table)
+
+pred_table<-prop.table(lm_table,margin=1)
+
+pred_table
+
+rownames(pred_table)<-c("Predicted: Yes","Predicted: No")
+colnames(pred_table)<-c("Actual: Yes","Actual: No")
+
+## Generate confusion matrix
+confusionMatrix(data=lm_predict_bin,
+                reference = lm_mod$y,positive="1")
+```
+
 5. Calculate the AUC for the linear predictions from the ROC against the outcome for the training dataset. 
+```{r}
+lm_predict_no_na<-na.omit(lm_predict)
+
+lm_roc<-roc(lm_predict_no_na,as.factor(lm_mod$y))
+
+auc(lm_roc) #this command (area under curve) tells us the area
+ 
+#the auc of my linear model is .65
+plot(lm_roc)
+```
+
 6. Now, predict the probability of being a lemon using a logistic regression (`glm(y~x,family=binomial(link="logit")`)), again using covariates of your choosing. Add these to the existing linear model already give to you.  
+```{r}
+#Logisitic model
+
+logit_mod<-glm(IsBadBuy~ 
+                VehYear+
+             VehicleAge+ 
+             Make+ 
+             Nationality+
+             WarrantyCost,
+             data=lem_train,
+            na.action=na.exclude,
+            family=binomial(link="logit"),
+               y=TRUE)
+
+summary(logit_mod)
+```
+
 7. Make predictions from the logit model. Make sure these are probabilities. 
+```{r}
+logit_predict<-predict(logit_mod,type="response")
+logit_predict
+```
+
 8. Calculate the AUC for the linear predictions from the ROC. 
+```{r}
+logit_predict_no_na<-na.omit(logit_predict)
+
+logit_roc<-roc(logit_predict_no_na,as.factor(logit_mod$y))
+
+auc(logit_roc) 
+#the auc for my logit model is .65 also
+
+plot(logit_roc)
+```
 9. (optional) submit your predictions from the testing dataset as a late submission to Kaggle and see how you do against real-wolrd competition. 
