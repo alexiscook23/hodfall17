@@ -51,7 +51,6 @@ lm_mod<-lm(IsBadBuy~
              VehicleAge+ 
              Make+ 
              Nationality+
-             logit_predict+ #added the logit_predict variable in
              WarrantyCost,
            data=lem_train,y=TRUE,na.exclude=TRUE);summary(lm_mod)
 ```
@@ -114,6 +113,18 @@ logit_mod<-glm(IsBadBuy~
                y=TRUE)
 
 summary(logit_mod)
+```
+```{r linear_model2}
+# Second Linear model
+
+lm_mod<-lm(IsBadBuy~
+             VehYear+
+             VehicleAge+ 
+             Make+ 
+             Nationality+
+             logit_predict+ #added the logit_predict variable in
+             WarrantyCost,
+           data=lem_train,y=TRUE,na.exclude=TRUE);summary(lm_mod)
 ```
 
 7. Make predictions from the logit model. Make sure these are probabilities. 
