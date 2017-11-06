@@ -1,0 +1,58 @@
+---
+title: "In class guide"
+
+---
+
+
+```{r libraries}
+library(tidyverse)
+library(knitr)
+library(caret)
+library(forcats)
+library(tidytext)
+library(stringr)
+library(AUC)
+```
+
+
+```{r}
+za<-read_csv("za_train.csv")
+za_test<-read_csv("za_test.csv")
+```
+
+
+```{r}
+#Logisitic model
+
+logit_mod<-glm(got_pizza~
+                 age+
+                 karma+
+                 log(total_posts+1)+
+                 raop_posts+
+                 karma+
+                 student+
+                 grateful+
+                 pop_request+
+                 score,
+               data=za,
+               na.action=na.exclude,
+               family=binomial(link="logit"),
+               y=TRUE)
+
+summary(logit_mod)
+```
+
+##Prediction
+
+```{r}
+logit_predict<-predict(logit_mod,newdata=test,type="response")
+```
+
+```{r}
+
+logit_roc<-roc(logit_predict, za_test$got_pizza)
+auc(logit_roc)
+
+```
+
+

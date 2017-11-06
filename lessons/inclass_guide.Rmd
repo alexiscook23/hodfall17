@@ -1,0 +1,76 @@
+---
+title: "In class guide"
+
+---
+
+
+```{r libraries}
+library(tidyverse)
+library(knitr)
+library(caret)
+library(forcats)
+library(tidytext)
+library(stringr)
+library(AUC)
+```
+
+
+```{r}
+za<-read_csv("za_train.csv")
+za_test<-read_csv("za_test.csv")
+```
+
+
+```{r}
+#Logisitic model
+
+# Binary variable: word "student" in text
+za<-za%>%mutate(favor=ifelse(grepl(x=request_text,pattern="favor"),1,0))%>%
+        mutate(favor=fct_recode(as.factor(favor),
+                            "Favor"="1",
+                            "No Favor"="0"))
+
+
+
+logit_mod<-glm(got_pizza~
+                 age+
+                 karma+
+                 log(total_posts+1)+
+                 raop_posts+
+                 karma+
+                 student+
+                 grateful+
+                 pop_request+
+                 score+
+                 favor,
+               data=za,
+               na.action=na.exclude,
+               family=binomial(link="logit"),
+               y=TRUE)
+
+summary(logit_mod)
+```
+
+##Prediction
+
+```{r}
+logit_predict<-predict(logit_mod,newdata=za_test,type="response")
+```
+
+```{r}
+
+
+# Binary variable: word "student" in text
+za_test<-za_test%>%mutate(favor=ifelse(grepl(x=request_text,pattern="favor"),1,0))%>%
+        mutate(favor=fct_recode(as.factor(favor),
+                            "Favor"="1",
+                            "No Favor"="0"))
+
+
+logit_roc<-roc(logit_predict, za_test$got_pizza)
+
+auc(logit_roc)
+
+```
+
+

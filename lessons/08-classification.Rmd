@@ -167,7 +167,7 @@ head(za)
 za_train<-za%>%sample_frac(.5)
 za_test<-setdiff(za,za_train)
 write_csv(za_train,path="za_train.csv")
-write_csv(za_train,path="za_test.csv")
+write_csv(za_test,path="za_test.csv")
 
 ```
 
@@ -316,7 +316,7 @@ summary(logit_mod)
 With these results in hand we can generate predicted probabilities and see if this model did any better. To get predicted probabilities
 
 ```{r}
-logit_predict<-predict(logit_mod,type="response")
+logit_predict<-predict(logit_mod,newdata=test,type="response")
 ```
 
 We can convert the predictions to a binary variable by setting a "threshold" of .5. Any prediction above .5 is considered to be a 1, anything below, a 0. 

@@ -46,24 +46,24 @@ print(select(class,first_name,last_name,table),n=100)
     ## # A tibble: 18 x 3
     ##    first_name  last_name  table
     ##         <chr>      <chr> <fctr>
-    ##  1       C.J.       Pond      1
-    ##  2       Cole      Smith      1
-    ##  3     Alexis       Cook      2
-    ##  4      Ethan      Polan      2
-    ##  5     Connor       Kreb      3
-    ##  6     Rachel      Anand      3
-    ##  7      Katie      Means      4
+    ##  1       Siqi       Chen      1
+    ##  2     Connor       Kreb      1
+    ##  3      Raven       Delk      2
+    ##  4     Rachel      Anand      2
+    ##  5     Claire    Fogarty      3
+    ##  6      Katie      Means      3
+    ##  7      Susan       Cobb      4
     ##  8      Sunny        Cao      4
-    ##  9     Claire    Fogarty      5
+    ##  9       C.J.       Pond      5
     ## 10      Henry Livingston      5
-    ## 11        Ben     Scheer      6
-    ## 12      Raven       Delk      6
-    ## 13     Brenda         Lu      7
+    ## 11     Alexis       Cook      6
+    ## 12     Brenda         Lu      6
+    ## 13       Cole      Smith      7
     ## 14      Arjun       Shah      7
-    ## 15      Susan       Cobb      8
-    ## 16       Siqi       Chen      8
-    ## 17       Will   Sullivan      9
-    ## 18       Jack     Cramer      9
+    ## 15       Will   Sullivan      8
+    ## 16       Jack     Cramer      8
+    ## 17      Ethan      Polan      9
+    ## 18        Ben     Scheer      9
 
 ``` r
 names(class)
