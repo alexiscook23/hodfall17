@@ -128,4 +128,5 @@ gg<-gg+xlab("Rank")+ylab("Percent Change CO2 Emissions")
 gg
 
 ```
-
+cookbook for R graphics online can help with graphics
+need to build out the variables a little moreo (fees collected, more types of laws etc)
