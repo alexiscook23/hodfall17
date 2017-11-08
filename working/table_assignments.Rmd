@@ -15,8 +15,8 @@ class["random"]<-runif(dim(class)[1])
 class<-class%>%arrange(random)
 
 class["index"]<-seq(1:dim(class)[1])
-
-class<-class%>%mutate(table=cut(index,9,(1:9)))
+ngroups<-4
+class<-class%>%mutate(table=cut(index,ngroups,(1:ngroups)))
 
 class$rmse<-NA
 

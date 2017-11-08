@@ -35,8 +35,8 @@ class["random"]<-runif(dim(class)[1])
 class<-class%>%arrange(random)
 
 class["index"]<-seq(1:dim(class)[1])
-
-class<-class%>%mutate(table=cut(index,9,(1:9)))
+ngroups<-4
+class<-class%>%mutate(table=cut(index,ngroups,(1:ngroups)))
 
 class$rmse<-NA
 
@@ -46,24 +46,24 @@ print(select(class,first_name,last_name,table),n=100)
     ## # A tibble: 18 x 3
     ##    first_name  last_name  table
     ##         <chr>      <chr> <fctr>
-    ##  1       Siqi       Chen      1
-    ##  2     Connor       Kreb      1
-    ##  3      Raven       Delk      2
-    ##  4     Rachel      Anand      2
-    ##  5     Claire    Fogarty      3
-    ##  6      Katie      Means      3
-    ##  7      Susan       Cobb      4
-    ##  8      Sunny        Cao      4
-    ##  9       C.J.       Pond      5
-    ## 10      Henry Livingston      5
-    ## 11     Alexis       Cook      6
-    ## 12     Brenda         Lu      6
-    ## 13       Cole      Smith      7
-    ## 14      Arjun       Shah      7
-    ## 15       Will   Sullivan      8
-    ## 16       Jack     Cramer      8
-    ## 17      Ethan      Polan      9
-    ## 18        Ben     Scheer      9
+    ##  1     Brenda         Lu      1
+    ##  2       C.J.       Pond      1
+    ##  3      Katie      Means      1
+    ##  4     Connor       Kreb      1
+    ##  5     Alexis       Cook      1
+    ##  6      Sunny        Cao      2
+    ##  7      Susan       Cobb      2
+    ##  8     Rachel      Anand      2
+    ##  9     Claire    Fogarty      2
+    ## 10       Siqi       Chen      3
+    ## 11       Cole      Smith      3
+    ## 12        Ben     Scheer      3
+    ## 13       Jack     Cramer      3
+    ## 14      Arjun       Shah      4
+    ## 15      Ethan      Polan      4
+    ## 16      Henry Livingston      4
+    ## 17      Raven       Delk      4
+    ## 18       Will   Sullivan      4
 
 ``` r
 names(class)
@@ -100,7 +100,5 @@ gg<-ggplot(class_summary,aes(x=table,y=current_rmse,fill=table))
 gg<-gg+geom_bar(stat="identity",position=position_dodge())
 gg
 ```
-
-    ## Warning: Removed 3 rows containing missing values (geom_bar).
 
 ![](table_assignments_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-2-1.png)
