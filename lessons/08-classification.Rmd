@@ -263,6 +263,12 @@ lm_predict<-predict(lm_mod)
 ## Convert to binary, 1= >.5
 lm_predict_bin<-ifelse(lm_predict>.5,1,0)
 
+lpm_roc<-roc(lm_predict_bin,as.factor(logit_mod$y))
+
+auc(logit_roc)
+ 
+
+
 ## Table of actual vs. predicted, what's going on here?
 lm_table<-table(lm_predict_bin,lm_mod$y)
 
