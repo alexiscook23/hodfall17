@@ -1,0 +1,145 @@
+Assignment 9
+---
+
+Complete the following steps:
+
+1. Using the nyclfights13 library, open all of the data tables and turn them into a databse. Make sure to include flights, airlines, airports, weather and planes.
+```{r}
+# Mostly taken from : http://cran.r-project.org/web/packages/dplyr/vignettes/databases.html circa 2014
+
+#Get libraries
+library(tidyverse)
+library(DBI)
+library(dbplyr)
+library(RSQLite)
+library(nycflights13)
+library(Lahman)
+
+# Data sources from NYC flights
+data(flights)
+data(airlines)
+data(airports)
+data(weather)
+data(planes)
+
+con <- dbConnect(RSQLite::SQLite(), ":memory:")
+
+#Write flights tables to database (you won't usually do this)
+dbWriteTable(con,
+             "flights", 
+             as.data.frame(flights))
+
+dbWriteTable(con,
+             "planes", 
+             as.data.frame(planes))
+
+dbWriteTable(con,
+             "airlines", 
+             as.data.frame(airlines))
+
+dbWriteTable(con,
+             "weather", 
+             as.data.frame(weather))
+
+dbWriteTable(con,
+             "airports", 
+             as.data.frame(airports))
+
+#List tables in database
+dbListTables(con)
+
+#List fields in various tables
+dbListFields(con,"airlines")
+
+dbListFields(con,"planes")
+
+dbListFields(con,"flights")
+
+#struggling to find a way to view the column names in a particle table in the database (trying to see what the ent)
+Columns <- as.data.frame(colnames(dbFetch(con, "flights")))
+```
+
+2. Create a data frame from a SQL pull from the database that consists only of flights that took off from JFK in May.
+```{r}
+#New request: which carriers have longer delays? 
+req1_text<-"SELECT a.carrier, a.name, f.origin, f.month
+            FROM flights f 
+            JOIN airlines a ON a.carrier=f.carrier 
+            WHERE f.month=5 AND f.origin=JFK
+            "
+
+#doesn't work because says that JFK column doesn't exist in the f.origin, so I thought it could be numeric like the months are, but that came up with 0 results (which is highly unlikely that there were no flights from JFK in May)
+req1<-dbSendQuery(con,req1_text)
+
+req1_df<-dbFetch(req1,n=-1)
+
+dbClearResult(req1)
+
+head(req1_df) 
+
+```
+
+3. Create a data frame from a SQL pull from the database that consists only of flights that took off on-time (a delay of less than 10 minutes) from Newark at temperatures of less than 40 degrees F.
+
+```{r}
+#SQL request, flight info combined with weather info
+weather_text<-"SELECT f.dep_delay, f.origin, w.temp
+              FROM weather w
+              JOIN flights f
+              ON f.year=w.year
+              AND f.month=w.month
+              AND f.day=w.day
+              WHERE f.dep_delay<10 AND w.temp<40 AND f.origin=NWK"
+
+weather_req<-dbSendQuery(con,weather_text)
+
+weather_df<-dbFetch(weather_req,n=-1)
+
+dbClearResult(weather_req)
+
+head(weather_df)
+```
+
+4. Create data frame from a SQL pull from the database that consists of planes flown by United.
+```{r}
+req_text<-"SELECT a.carrier, a.name, f.tailnum
+            FROM flights f
+            JOIN airlines a 
+            ON a.carrier=f.carrier 
+            WHERE a.carrier=UA
+            "
+
+req<-dbSendQuery(con,req_text)
+
+req_df<-dbFetch(req,n=-1)
+
+dbClearResult(req)
+
+head(req_df) 
+
+```
+
+5. Create a model that tests whether certain plane types (e.g. 737s) are more likely to have arrival delays than other planes. You can include other variables in the model. You'll need to do a pull from more than one table to get the data you need. 
+```{r}
+req2text<-"SELECT f.dep_delay, p.tailnum, f.carrier, p.type, p.model FROM planes p JOIN flights f ON p.tailnum=f.tailnum"
+
+req2<-dbSendQuery(con,req2text)
+
+req2_df<-dbFetch(req2,n=-1)
+
+dbClearResult(req2)
+
+head(req2_df) 
+
+mod<-lm(dep_delay~
+           tailnum+
+           carrier+
+           model+
+           type,
+           data=req2_df)
+
+summary(mod)
+
+
+```
+
