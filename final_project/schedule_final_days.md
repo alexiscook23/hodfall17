@@ -6,9 +6,9 @@ Will Doyle
 Schedule for last few weeks
 ---------------------------
 
-2017-11-08, Weds
+*2017-11-08, Weds*
 
-2017-11-12 Assignment 9 Due
+*2017-11-12 Assignment 9 Due*
 
 2017-11-13, Mon Multiple Models
 
@@ -16,7 +16,7 @@ Schedule for last few weeks
 
 2017-11-20 & 2017-11-22 Thanksgiving Break
 
-2017-11-26 Assignment 10 due
+DELETED: 2017-11-26 Assignment 10 due
 
 2017-11-27 Unsupervised Learning
 
@@ -26,10 +26,40 @@ Schedule for last few weeks
 
 2017-12-04 Presentations (5 min each)
 
-Anand Cao Chen Cook Cramer Delk Fogarty Kreb
+Anand
+
+Cao
+
+Chen
+
+Cook
+
+Cramer
+
+Delk
+
+Fogarty
+
+Kreb
 
 2017-12-06 Presentations (5 min each)
 
-Livingston Lu Means Polan Pond Scheer Shah Smith Sullivan
+Livingston
+
+Lu
+
+Means
+
+Polan
+
+Pond
+
+Scheer
+
+Shah
+
+Smith
+
+Sullivan
 
 2017-12-11 Monday Final Projects Due
