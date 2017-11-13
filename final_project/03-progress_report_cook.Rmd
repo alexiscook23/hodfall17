@@ -41,7 +41,7 @@ View(cap_laws)
 
 coal_laws_total<-merge(cap_laws,coal_co2_slim,by="state")
 
-coal_laws_total>-coal_laws_total%>%mutate(percent_change_emissions=as.numeric(percent_change_emissions)) #this is to recode the emissions variable so that it's numeric (since the next code chunck has an error message about non-numeric variables)... however, it keeps sending an error message about an invalid argument to unary operator
+coal_laws_total<-coal_laws_total%>%mutate(percent_change_emissions=as.numeric(percent_change_emissions)) #this is to recode the emissions variable so that it's numeric 
 
 View(coal_laws_total)
 ```
@@ -52,9 +52,9 @@ Graphic: Rank of State Percent Change in CO2 Emissions from 1980-2014
 ```{r univariate plot}
 
 #create a new variable that is my percent change rank of state in order (1 being the least increase (aka biggest decrease) in c02 emission and 50 being the biggest increase in emissions)
-coal_laws_total>-coal_laws_total%>%mutate(state_sort=fct_reorder(f=coal_laws_total,x=percent_change_rank),ties.method="random")
+coal_laws_total<-coal_laws_total%>%mutate(state_sort=fct_reorder(f=coal_laws_total,x=percent_change_rank),ties.method="random")
 
-coal_laws_total>-coal_laws_total%>%mutate(state_sort=fct_reorder(percent_change_rank),ties.method=random)
+coal_laws_total<-coal_laws_total%>%mutate(state_sort=fct_reorder(percent_change_rank),ties.method=random)
 
 
 #this is the code for the plot, but it won't let me actually run the code because it says I have a non-numeric argument to the binary operator; I originally assumed it doesn't think the percent change variable is numeric (since I know for sure the rank variable is numeric), but I tested with other variables and get the same error message. Either way, I'm unsure how to change that since I pulled the emission numbers off the EPA website and can't fix them like I could the variables I made in excel                                          
@@ -128,5 +128,7 @@ gg<-gg+xlab("Rank")+ylab("Percent Change CO2 Emissions")
 gg
 
 ```
+need to figure out the non-numeric error message, the reordered variable in order of rank, build out the variables (help below), and see what else I can incorporate from lessons
+
 cookbook for R graphics online can help with graphics
 need to build out the variables a little moreo (fees collected, more types of laws etc)
