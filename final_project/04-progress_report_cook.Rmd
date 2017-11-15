@@ -46,10 +46,14 @@ coal_laws_total<-merge(cap_laws,coal_co2_slim,by="state")
 coal_laws_total<-coal_laws_total%>%mutate(percent_change_emissions=as.numeric(percent_change_emissions)) #this is to recode the emissions variable so that it's numeric 
 
 
+coal_laws_total$abbreviation<-as.factor(coal_laws_total$abbreviation) 
+
+coal_laws_total$percent_change_rank<-as.factor(coal_laws_total$percent_change_rank) 
+
 View(coal_laws_total)
 ```
-##Question: 
-To what extent does state environmental legislation impact actual environmental outcomes, measured by CO2 emissions? 
+##Goal: 
+We are a state legislation group trying to decide what would be the most effective use of our funds in order to decrease the CO2 emissions in our state. To do so, we're measuring the impact that various legislation and investments have had on CO2 emissions across states.
 
 #Data and Measurements:
 The data in this report is gleaned from the US Energy Information Administration, the US Environmental Protection Agency, and the National Conference of State Legislation. All binary variables were coded based on the presence or absence of particular legislation enacted by state, as recorded in the National Conference of State Legislation.
@@ -61,14 +65,18 @@ Graphic: Rank of State Percent Change in CO2 Emissions from 1980-2014
 #doesn't have to be a new variable;  but just need it all reordered by percent change rank 1-50
 #create a new variable that is my percent change rank of state in order (1 being the least increase (aka biggest decrease) in c02 emission and 50 being the biggest increase in emissions)
 #what I want this to look like is the state abbreviations on the y axis (because of coord flip), all in order of percent change rank. Then on the x axis will be the numbers for percent change in co2 emission 
-coal_laws_total<-coal_laws_total%>%mutate(state_sort=fct_reorder(f=coal_laws_total,x=percent_change_rank),ties.method="random")
+coal_laws_total<-coal_laws_total%>%mutate(state_sort=fct_reorder(f=abbreviation,x=percent_change_rank))
 
-coal_laws_total<-coal_laws_total%>%mutate(state_sort=fct_reorder(percent_change_rank),ties.method=random)
+View(coal_laws_total)
+
+coal_laws_total<-coal_laws_total%>%mutate(state_sort=fct_reorder(percent_change_rank),ties.method="random")
 
 
 #this is the code for the plot, but it won't let me actually run the code because it says I have a non-numeric argument to the binary operator                                  
 ## Plot by rank
-gg<-ggplot(data=coal_laws_total,aes(x=state_sort,y=percent_change_emissions) +geom_bar())
+gg<-ggplot(data=coal_laws_total,aes(x=state_sort,y=percent_change_emissions))
+gg<-gg +geom_bar()
+
 ##Add Axis Labels
 gg<-gg+xlab("State by Rank of Change in CO2 Emissions")+ylab("CO2 Emissions Percent Change 1980-2014")
 
@@ -87,7 +95,7 @@ As the figure shows, Louisiana is ranked 50th in percent change of CO2 emissions
 ```{r}
 ##Condtional Average of percent change in co2 emissions based on 4 levels of investment in renewable energy by state
 ## Create a variable for quartiles of investment in renewable energy
-coal_laws_total<-coal_laws_total%>%mutate(investment_level=ntile(renewable_investment,4,na.action="na.exclude"))
+coal_laws_total<-coal_laws_total%>%mutate(investment_level=ntile(renewable_investment,4))
 
 table(coal_laws_total$investment_level)
 
@@ -124,11 +132,9 @@ gg
 
 #Predictive Model of CO2 Emissions
 ```{r}
-
-#this is the code for the regression and conditional average, but it won't let me run these either because it says there are non-numeric arguments (same error message as plot)
 #regression of percent change of emissions by state based on that state's investment in renewable energy and the existence of legal state-wide co2 emission caps
 mod<-lm(percent_change_emissions~ 
-           log(renewable_investment)+ 
+           renewable_investment+ 
            emission_cap,
          data=coal_laws_total,na.action="na.exclude")
 summary(mod)
@@ -168,4 +174,5 @@ cookbook for R graphics online can help with graphics
 need to build out the variables a little moreo (fees collected, more types of laws etc)
 
 can incorporate GDP change as a percentage over 1980-2014, population change as a percent from 1980-2014, fines collected for violation of emission laws by state, and existence of coal laws
+-----need to do a cross-validation
 
