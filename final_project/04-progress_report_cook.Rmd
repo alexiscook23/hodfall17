@@ -1,6 +1,6 @@
 Progress Report 4
 ====================
-  
+   
 1. A strong (A) data analysis will use at least two of the four algorithms (conditional means, regression, logistic regression, k-means clustering) that we discussed in class. The data analysis will include a measure of model fit and will describe which characeristics are closely related to the outcome. The analysis will include cross-validation, which will be correctly exectued and described. 
 
 2. A strong (A) final project will include nicely labeled, easy to understand graphics that describe exactly what is happening with the patterns in the data. The graphics will be complex, showing lots of numbers. The response could include (but doesn't have to include) interactive graphics. 
