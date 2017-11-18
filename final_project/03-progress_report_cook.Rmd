@@ -132,3 +132,10 @@ need to figure out the non-numeric error message, the reordered variable in orde
 
 cookbook for R graphics online can help with graphics
 need to build out the variables a little moreo (fees collected, more types of laws etc)
+
+
+## COMMENTS from WD
+
+## Alexis-- we've had a chance to talk about this now, you should be good
+## to go. Try to exapnd the number of predictors and think about why some
+## states have higher or lower levels of predicted emissions.
