@@ -214,7 +214,7 @@ summary(fit1) #this is the results of the averaging of the coefficients to get t
 ```
 The cross-validation of models, when ran 1000 times at 20% testing data, gives an rmse of 27.4, meaning this is a fairly reliable model. It's interesting that this cross-validated model actually has a higher RMSE than the original regression model. The RMSESD, which measures variability, is 36.5. 
 
-#Take-aways
+#Take-aways 
 Overall, it seems that emission cap laws have a more significant impact on CO2 emissions by state than investments in renewable energy or the use of public transportation. The models included state GDP and population to control for these variables, since they are known to be highly correlated to total CO2 emission by state. Under the assumption that the goal is to minimize CO2 emissions, the government agency should invest its time and energy in enacting an emission cap law in the state, or improving the rigor of the law if it already has one in place, instead of investing in renewable energy or public transportation. 
 
 
