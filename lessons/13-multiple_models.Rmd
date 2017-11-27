@@ -198,17 +198,7 @@ qf<-qf%>%
          person_per_hh)%>%
        mutate_all(funs(as.numeric))%>%tbl_df()
 
-fitControl <- trainControl(method = "cv",
-                            n=100,
-                            p=)
-
-qf$log_median_home_val<-log(qf$median_home_val+1)
-
-
-fit1<-train(mod1_formula,
-            data=qf,
-            method="lm",
-            trControl=fitControl)
+df<-df%>%mutate(myvar=as.character(myvar))
 ```
 ## Machine Learning
 
@@ -217,11 +207,14 @@ Of course, we can also just let the computer choose a model from a set of candid
 ```{r}
 #Tuning model parameters
 
+qf$log_median_home_val<-log(qf$median_home_val+1)
+
+qf<-qf[,-"median_home_val"]
+
 fit2<-train(log_median_home_val~.,
             data=qf,
             method="glmStepAIC",
-            trControl=fitControl,
-            verbose=TRUE)
+            trControl=fitControl)
 
 fit1$results
 

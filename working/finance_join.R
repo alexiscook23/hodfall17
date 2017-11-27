@@ -1,5 +1,8 @@
 library(tidyquant)
 
+qkey<-readLines("quandl_key.txt",warn = FALSE)
+quandl_api_key(qkey)
+
 symbols<-c("GOOG","IBM")
 
 full_df<-NULL #Initialize empty dataset
@@ -7,7 +10,9 @@ full_df<-NULL #Initialize empty dataset
 for (symbol in symbols){
 
   # pull financials
-financial<-tq_get(symbol,get="financial",from="2001-01-01")
+financial<-tq_get("SF1/IBM_GP_MRQ",
+                  from="2001-01-01",
+                  get="quandl")
 
 # pull prices
 stock_price<-tq_get(symbol,get="stock.prices")
@@ -44,6 +49,8 @@ fin_CF<-financial%>%
 # combine all financials
 fin<-rbind(fin_IS,fin_BS,fin_CF)
 
+fin<-fin%>%spread(category,value)
+
 #add name of stock
 fin$name<-symbol
 # Get year for merge
@@ -66,7 +73,7 @@ full_df<-rbind(full_df,q_df)
 
 ## Use spread to create new column for all financial chars
 full_df2<-full_df%>%
-  spread(category,value)
+  
 
 # linear model
 
