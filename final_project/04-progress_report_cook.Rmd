@@ -76,19 +76,18 @@ The data in this report is gleaned from the US Energy Information Administration
 Dependent Variable: CO2 Emissions by State
 Graphic: Rank of State Percent Change in CO2 Emissions from 1980-2014
 ```{r univariate plot}
-#should figure out how to make it interactive and show the abbreviation state names when you gloss over
-#ggplotly label is abbreviation; aes(text=abbreviation) along w x and y 
+#drop LA to increase accuracy
+coal_laws_total<-coal_laws_total[-(c(16)),]
 
-## Plot by rank
-gg<-ggplot(data=filter(coal_laws_total,abbreviation!="LA"),                      aes(x=percent_change_rank,y=percent_change_emissions))
-gg<-gg +geom_bar(stat="identity")
+p <- plot_ly(coal_laws_total, x = ~percent_change_rank, y = ~percent_change_emissions, type = 'bar', text = ~state,
+        marker = list(color = 'rgb(158,202,225)',
+                      line = list(color = 'rgb(8,48,107)',
+                                  width = 1.5))) %>%
+  layout(title = "State Change in CO2 Emissions",
+         xaxis = list(title = "States"),
+         yaxis = list(title = "Percent Change in CO2 Emissions (1980-2014)"))
+p
 
-##Add Axis Labels
-gg<-gg+xlab("State by Rank of Change in CO2 Emissions")+ylab("CO2 Emissions Percent Change 1980-2014")
-
-## Add Points
-gg<-gg+geom_point(alpha=1,size=.5)
-gg
 
 ```
 
@@ -97,14 +96,12 @@ percent_change_emissions<-coal_laws_total$percent_change_emissions
 mean(percent_change_emissions)
 median(percent_change_emissions)
 ```
-As the figure shows, the percent change in CO2 emissions from 1980-2014 ranges from a 100% decrease to 723% increase in emissions. Louisiana is an outlier, with an increase in 11200% emissions during that time. Louisiana increased emissions by such a substantive amount in the past three decades because of an increased focus on industry in the economy. It was dropped in the graph so as not to skew visibility. The mean change in CO2 emission by state during this time was 280% increase, and the median change in CO2 emissions was 9.52% increase. The mean is substantially higher because it includes the outlier of Louisiana. 
+As the figure shows, the percent change in CO2 emissions from 1980-2014 ranges from a 100% decrease to 723% increase in emissions. Louisiana is an outlier, with an increase in 11200% emissions during that time. Louisiana increased emissions by such a substantive amount in the past three decades because of an increased focus on industry in the economy. It was dropped in the graph so as not to skew visibility. The mean change in CO2 emission by state during this time was 45.4% increase, and the median change in CO2 emissions was 9.52% increase (when LA is excluded). The interactive graph lists state rank of change in CO2 emissions, actual percent change in emissions, and state name.  
 
 #How does level of investment in renewable energy affect CO2 emission by state?
 ```{r}
 ##Condtional Average of percent change in co2 emissions based on 4 levels of investment in renewable energy by state
-##drop LA from the df to increase accuracy
 ## Create a variable for quartiles of investment in renewable energy
-coal_laws_total<-coal_laws_total[-(c(16)),]
 coal_laws_total<-coal_laws_total%>%mutate(investment_level=ntile(renewable_investment,4))
 
 table(coal_laws_total$investment_level)
@@ -220,9 +217,6 @@ The cross-validation of models, when ran 1000 times at 20% testing data, gives a
 #Take-aways
 Overall, it seems that emission cap laws have a more significant impact on CO2 emissions by state than investments in renewable energy or the use of public transportation. The models included state GDP and population to control for these variables, since they are known to be highly correlated to total CO2 emission by state. Under the assumption that the goal is to minimize CO2 emissions, the government agency should invest its time and energy in enacting an emission cap law in the state, or improving the rigor of the law if it already has one in place, instead of investing in renewable energy or public transportation. 
 
------
-cookbook for R graphics online can help with graphics
-could build out the variables a little more (fees collected, more types of laws etc)
 
 -----need to plot cross-validation; ideally with a few models
 
