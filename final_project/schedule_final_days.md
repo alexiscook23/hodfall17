@@ -10,17 +10,17 @@ Schedule for last few weeks
 
 *2017-11-12 Assignment 9 Due*
 
-2017-11-13, Mon Multiple Models
+*2017-11-13, Mon Multiple Models*
 
-2017-11-15, Weds Multiple Models
+*2017-11-15, Weds Multiple Models*
 
-2017-11-20 & 2017-11-22 Thanksgiving Break
+*2017-11-20 & 2017-11-22 Thanksgiving Break*
 
-DELETED: 2017-11-26 Assignment 10 due
+*DELETED: 2017-11-26 Assignment 10 due*
 
 2017-11-27 Unsupervised Learning
 
-2017-11-28 Code-A-Rama, 5-8 PM
+2017-11-28 Code-A-Rama, 5-7:15 PM, Payne 108
 
 2017-11-29 Unsupervised Learning
 
