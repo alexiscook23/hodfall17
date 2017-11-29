@@ -1,0 +1,236 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+   
+1. A strong (A) data analysis will use at least two of the four algorithms (conditional means, regression, logistic regression, k-means clustering) that we discussed in class. The data analysis will include a measure of model fit and will describe which characeristics are closely related to the outcome. The analysis will include cross-validation, which will be correctly exectued and described. 
+
+2. A strong (A) final project will include nicely labeled, easy to understand graphics that describe exactly what is happening with the patterns in the data. The graphics will be complex, showing lots of numbers. The response could include (but doesn't have to include) interactive graphics. 
+
+3. A strong (A) final project will include a 1500-2000 word description that is easily understandable by an interested layperson. Assume that your audience is your boss-- not me. It will be much easier to write this if you have a perspective. 
+
+A strong (A) paper will have code that can generate results from the raw data in an easy to understand way. The code will be commented and will run on my computer without me having to tweak it in any way. (Easy test is to knit the document, with all related files in same directory)
+
+```{r  include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(plotly)
+library(gridExtra)
+library(ModelMetrics)
+library(haven)
+library(readxl)
+library(forcats)
+library(RColorBrewer)
+library(rvest)
+library(caret)
+```
+
+```{r data}
+download.file("https://www.eia.gov/environment/emissions/state/excel/coal_CO2_by_state_2014.xlsx",destfile = "coal_co2.xlsx",method="curl")
+
+coal_co2<-read_excel("coal_co2.xlsx")
+
+## Create a rank variable for percent change (excluding unnecessary rows and all columns that aren't percent change)
+
+coal_co2_slim<-coal_co2[-(c(1,2,9,11,14,42,54:58)),-(c(2:35))]
+coal_co2_slim<-coal_co2_slim%>%mutate(X__36=as.character(X__36))
+coal_co2_slim<-coal_co2_slim%>%mutate(X__36=as.numeric(X__36))
+
+coal_co2_slim<-coal_co2_slim%>%mutate(percent_change_rank=rank(`X__36`))
+
+colnames(coal_co2_slim)<-c("state","emissions2014", "percent_change_emissions","absolute_change_emissions","percent_change_rank")
+
+coal_co2_slim<-coal_co2_slim%>%mutate(percent_change_emissions=percent_change_emissions*100)
+
+#open csv file I created that has: abbreviation of state name, binary for co2 emission cap laws by state, and investment in renewable energy by state (in USD)
+cap_laws<-read_csv(file="emission_caps.csv")
+
+colnames(cap_laws)<-c("state","abbreviation","emission_cap","renewable_investment","gdp2014","pop2014","publicrides2013")
+cap_laws<-cap_laws[-(c(1)), ]
+
+coal_laws_total<-merge(cap_laws,coal_co2_slim,by="state")
+
+coal_laws_total<-coal_laws_total%>%mutate(percent_change_emissions=as.numeric(percent_change_emissions)) 
+
+
+coal_laws_total$abbreviation<-as.factor(coal_laws_total$abbreviation) 
+
+coal_laws_total<-coal_laws_total%>%
+  mutate_at(.vars=c("percent_change_emissions",
+                    "percent_change_rank",
+                    "renewable_investment",
+                    "emissions2014",
+                    "emission_cap",
+                    "gdp2014",
+                    "pop2014",
+                    "publicrides2013"),
+            .funs=(as.numeric))
+
+View(coal_laws_total)
+```
+##Goal: 
+We are a state legislation group trying to decide what would be the most effective use of our funds in order to decrease the CO2 emissions in our state. To do so, we're measuring the impact that various legislation and investments have had on CO2 emissions across states in the past in order to predict the most effective methods for future investment.
+
+#Data and Measurements:
+The data in this report is gleaned from the US Energy Information Administration, the US Environmental Protection Agency, the Bureau of Transportation Statistics, and the National Conference of State Legislation. All binary variables were coded based on the presence or absence of particular legislation enacted by state, as recorded in the National Conference of State Legislation. Hawaii, Rhode Island, and Connecticut were dropped as variables because of insufficient data regarding CO2 emissions.
+
+#Univariate Graphic
+Dependent Variable: CO2 Emissions by State
+Graphic: Rank of State Percent Change in CO2 Emissions from 1980-2014
+```{r univariate plot}
+#drop LA to increase accuracy
+coal_laws_total<-coal_laws_total[-(c(16)),]
+
+p <- plot_ly(coal_laws_total, x = ~percent_change_rank, y = ~percent_change_emissions, type = 'bar', text = ~state,
+        marker = list(color = 'rgb(158,202,225)',
+                      line = list(color = 'rgb(8,48,107)',
+                                  width = 1.5))) %>%
+  layout(title = "State Change in CO2 Emissions",
+         xaxis = list(title = "States by Rank"),
+         yaxis = list(title = "Percent Change in CO2 Emissions (1980-2014)"))
+p
+
+
+```
+
+```{r}
+percent_change_emissions<-coal_laws_total$percent_change_emissions
+mean(percent_change_emissions)
+median(percent_change_emissions)
+```
+In the above figure, the interactive feature lists state rank of change in CO2 emissions, actual percent change in emissions, and state name. 
+As the figure shows, the percent change in CO2 emissions from 1980-2014 ranges from a 100% decrease to 723% increase in emissions. Louisiana is an outlier, with an increase in 11200% emissions during that time. Louisiana increased emissions by such a substantive amount in the past three decades because of an increased focus on industry in the economy. It was dropped in the graph so as not to skew visibility. The mean change in CO2 emission by state during this time was 45.4% increase, and the median change in CO2 emissions was 9.52% increase (when LA is excluded).  
+
+#How does level of investment in renewable energy affect CO2 emission by state?
+```{r}
+##Condtional Average of percent change in co2 emissions based on 4 levels of investment in renewable energy by state
+## Create a variable for quartiles of investment in renewable energy
+coal_laws_total<-coal_laws_total%>%mutate(investment_level=ntile(renewable_investment,4))
+
+table(coal_laws_total$investment_level)
+
+coal_laws_total<-coal_laws_total%>%group_by(investment_level)%>% ## Group by predictor
+  ##Calculate mean at each level of predictor
+  mutate(pred_emission_investment=mean(percent_change_emissions))%>% 
+  ## Ungroup
+  ungroup()%>% 
+  #Rank by prediction, with ties sorted randomly
+  mutate(pred_emission_investment_rank=rank(pred_emission_investment,ties.method="random"))
+
+#scatterplot of conditional mean of investment rank
+gg<-ggplot(data=coal_laws_total,aes(x=pred_emission_investment_rank,y=percent_change_emissions,color="Actual"))
+gg<-gg+geom_point(alpha=.5,size=.5)
+gg<-gg+geom_point(aes(x=pred_emission_investment_rank,y=pred_emission_investment,color="Predicted"))
+gg<-gg+theme(legend.position="bottom")
+gg<-gg+xlab("State by Rank")+ylab("Percent Change CO2 Emissions")
+gg
+```
+
+
+```{r}
+#rmse of the conditional mean
+rmse_invest<-rmse(coal_laws_total$percent_change_emissions,coal_laws_total$pred_emission_investment)
+rmse_invest
+```
+The take-away from this graph is that the conditional mean of investment in renewable energy by state is a mediocre predictor of percent change in CO2 emissions and certainly has room for improvement. The rmse was 124.8. While there does seem to be a connection between the amount that a state invests in renewable energy sources and their reduction of CO2 emissions over time, the connection is certainly not pronounced. The outlier of Louisiana was again dropped to increase the accuracy of the model.  
+
+#How does the presence of a law capping CO2 emissions affect actual CO2 emissions?
+```{r}
+#Conditional mean of emission cap versus no emission cap 
+coal_laws_total%>%group_by(emission_cap)%>%summarize(mean(percent_change_emissions))
+
+coal_laws_total<-coal_laws_total%>%group_by(emission_cap)%>%
+  mutate(pred_cap=mean(percent_change_emissions))
+coal_laws_total$pred_cap
+
+rmse_cap<-rmse(coal_laws_total$percent_change_emissions,coal_laws_total$pred_cap)
+rmse_cap
+
+table(coal_laws_total$emission_cap) #how many states have the law versus don't
+```
+In comparing states with emission cap laws versus those without, it was found that states with a cap law averaged a 3 percent decrease of CO2 emissions from 1980 to 2014 while states without a cap law averaged a 63 percent increase in CO2 emissions during that time. While this shows a marked difference between states with and without an emissions cap law, the rmse was 125.8, meaning that the accuracy of this prediction is not very reliable. It should also be noted that 14 states have an emission cap law and 32 do not, meaning that part of the unreliability could be a consequence of the uneven distribution between the binary variable. In other words, there can be increased variability of percent change emissions of states with an emissions law because there are only 14 data points. 
+
+##Predictive Model of CO2 Emissions
+```{r}
+#regression of 2014 emissions by state based on that state's investment in renewable energy and the existence of legal state-wide co2 emission caps
+#make this the actual value as opposed to change and put gdp and population as variables 
+mod<-lm(emissions2014~ 
+           renewable_investment+
+           gdp2014+
+          pop2014+
+          publicrides2013+
+         emission_cap,
+         data=coal_laws_total,na.action="na.exclude")
+summary(mod)
+
+#create a variable of the predictions of the regression
+coal_laws_total<-coal_laws_total%>%add_predictions(mod)
+```
+##Accuracy of the model
+```{r}
+#rmse of model
+rmse<-with(coal_laws_total,rmse(emissions2014,pred));rmse
+```
+A regression model predicting the emissions of CO2 by state in 2014 is much more accurate than the conditional means, based on its rmse of 26.6. The regression included whether or not states had an emission cap law, the amount spent on renewable energy, the total amount of unlinked rides using public transportation in 2013, the population in 2014, and the GDP in 2014. The emission cap law is statistically significant, while the other factors are not. Emission caps have a negative correlation to emissions.  
+
+```{r}
+coal_laws_total<-coal_laws_total%>%
+  mutate_at(.vars=c("investment_level",
+                    "pred_emission_investment",
+                    "pred",
+                    "pred_emission_investment_rank"),
+            .funs=(as.numeric))
+
+
+#scatterplot of actual percent change emissions versus predicted percent change emissions from the regression
+#I'm commenting this out for now because it's ugly and the relationship is odd (seems like increased investment in renewable energy leads to increased predicted CO2 emissions)
+#g2<-ggplot(coal_laws_total, aes(x=renewable_investment,y=pred,label=abbreviation))
+#g2<-g2+geom_point(shape=1)
+#g2<-g2+geom_text(size=3)
+#g2<-g2+xlab("Renewable Investment")+ylab("Predicted CO2 Emissions in 2014")
+#g2
+```
+
+
+#Cross Validation of models
+```{r}
+coal_laws_total_cv<-coal_laws_total%>%
+      dplyr::select(emission_cap,renewable_investment,gdp2014,pop2014,publicrides2013,emissions2014,percent_change_emissions)%>%
+       mutate_all(funs(as.numeric))%>%tbl_df()
+
+#View(coal_laws_total_cv)
+
+coal_laws_total_cv<-coal_laws_total_cv%>%
+  crossv_mc(n=1000,test=.2)
+coal_laws_total_cv
+
+mod1_formula<-formula("emissions2014~
+               renewable_investment+
+           gdp2014+
+          pop2014+
+          publicrides2013+
+         emission_cap")
+
+mod1_rmse_cv<-coal_laws_total_cv %>% 
+  mutate(train = map(train, as_tibble)) %>% ## Convert to tibbles
+  mutate(model = map(train, ~ lm(mod1_formula, data = .)))%>%
+  mutate(rmse = map2_dbl(model, test, modelr::rmse))%>% 
+  dplyr::select(.id, rmse) ## pull just id and rmse 
+
+mod1_rmse_cv
+
+summary(mod1_rmse_cv$rmse)
+
+gg<-ggplot(mod1_rmse_cv,aes(rmse))
+gg<-gg+geom_histogram(bins=50)
+gg
+```
+
+The cross-validation of models, when ran 1000 times at 20% testing data, gives an average rmse of 46.8 and median rmse of 37.7, meaning this is a fairly reliable model. As expected, the cross-validated model actually has a higher RMSE than the original regression model because it split the data into testing and training, meaning it had less data to work with when informing its predictions. However, the cross-validated model is still more accurate because it is more apt at predicting future data, while the regression model is built to predict the data already present in the dataset. In the figure above, each rmse of the model is plotted, showing that the rmse was generally fairly low, depending on which random observations were categorized into the testing and training datasets each time.
+
+#Take-aways 
+Overall, it seems that emission cap laws have a more significant impact on CO2 emissions by state than investments in renewable energy or the use of public transportation. The models included state GDP and population to control for these variables, since they are known to be highly correlated to total CO2 emission by state. Under the assumption that the goal is to minimize CO2 emissions, the government agency should invest its time and energy in enacting an emission cap law in the state, or improving the rigor of the law if it already has one in place, instead of investing in renewable energy or public transportation. 
+
+
+-----the cost of the regulation will be the loss of business in the businesses themselves- try to quantify that to show a comparison between investing 1000 dollars in energy versus in a law etc; figure out what the hesitation for passing a law is; have a hypothetical situation where if the emission law is the best then how much would x state decrease emissions by passing a law; can try to work with AI from lesson 13 too
