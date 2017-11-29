@@ -220,3 +220,11 @@ Overall, it seems that emission cap laws have a more significant impact on CO2 e
 
 -----need to plot cross-validation; ideally with a few models
 
+
+
+Think about including a cost-benefit analysis, comparing the costs of various types of intervention, relative to their effectiveness. Also, while the writing here is pretty good, you need to write more—what do each of the various measures mean? COMMENTS from WD
+
+
+
+ COMMENTS from WD
+
