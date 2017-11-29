@@ -16,9 +16,10 @@ You should think of how to develop your skills in three different domains-- I ba
 
 ## Coding (aka Hacking)
 
-- First, keep coding! These skills will atrophy if you don't use them. Use R and Rstudio at work. Use it for your next paper. Use it to figure something out in your life. 
-- Second, get involved in open source projects. You will learn a ton. Look for people on github doing something that's interesting to you and join them.
-- Many massive online courses are taught in this area, and will be MUCH easier now that you have taken this class
+- First, keep coding! These skills will atrophy if you don't use them. Use R and Rstudio at work. Use it for your next paper. Use it to figure something out in your life. Take a gnarly spreadsheet that some organization uses and turn it into a nice piece of R code. 
+- Second, get involved in open source projects. You will learn a ton. Look for people on github doing something that's interesting to you and join them. 
+- Many massive online courses are taught in this area, and will be MUCH easier now that you have taken this class.
+- Another progrmming language: the other language that's used a lot for Data Science is Python, which is a better general scripting language but a worse statistical programming language. 
 - CS classes here and elsewhere are great, but many find them tough, and you don't need to be ready to write production code to do really interesting stuff. That said, if you want to get good, CS is the way to go. 
 
 ## Math
@@ -26,6 +27,8 @@ You should think of how to develop your skills in three different domains-- I ba
 - This is the hardest area to do on your own. You should really take more advanced stats courses, including a course on regression, a course on classification, and a course on latent trait analysis. Linear algebra forms the basis for almost all stats and is also super useful for programming, so it too is highly recommended.  
 - Take the class pass/fail if you're worried-- the skills are important, not the badge. 
 - Generally, people have the toughest time finishing math classes in MOOCs. The good news is there are a TON of them, so you can always try again. 
+
+TODO: Add list of Vandy classes 
 
 ## Substantive expertise
 

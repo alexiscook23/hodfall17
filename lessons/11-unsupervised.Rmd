@@ -46,9 +46,8 @@ Now, I'm going to use the `dummy` command from the `dummies` package to convert 
 
 ```{r}
 #Why are you traveling? 
-table(sf$purpose)
-
 sf$purpose<-sf$q2_1
+table(sf$purpose)
   purpose.mat<-dummy(sf$purpose)
   sf$business<-purpose.mat[,1]
   sf$pleasure<-purpose.mat[,2]
@@ -249,7 +248,6 @@ To create a nice table, we need to generate both row names and column names. We'
 
 
 ```{r}
-
 rownames(pt)<-mycols
 pt<-pt*100
 pt<-round(pt,1)
@@ -343,6 +341,7 @@ Now we'll `gather` everything, so that we have just two variables: the proportio
 sum2<-gather(sum1,-cluster,key=variable,value=value)
 sum2
 sum_total<-clus.data%>%summarize_all(funs(mean))
+
 sum_total<-gather(sum_total,key=variable,value=overall_mean)
 sum2<-left_join(sum2,sum_total,by="variable")
 ```
@@ -388,6 +387,11 @@ g1<-g1+facet_wrap(~cluster)
 ```{r}
 g1
 ```
+
+Group1 = Aunt Betsy Going to Visit Parents
+Group 2= Professional Vacationers: Bloggers and Bougie Grandmas
+Group 3= Once a year Disney family "strung out parents"
+Group 4= Sad Business Men
 
 
 ## Quick Exercise: Name these clusters for me
