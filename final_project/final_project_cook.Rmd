@@ -143,11 +143,19 @@ coal_laws_total%>%group_by(emission_cap)%>%summarize(mean(percent_change_emissio
 coal_laws_total<-coal_laws_total%>%group_by(emission_cap)%>%
   mutate(pred_cap=mean(percent_change_emissions))
 coal_laws_total$pred_cap
-
+ 
 rmse_cap<-rmse(coal_laws_total$percent_change_emissions,coal_laws_total$pred_cap)
 rmse_cap
 
 table(coal_laws_total$emission_cap) #how many states have the law versus don't
+
+#scatterplot of conditional mean of investment rank
+gg<-ggplot(data=coal_laws_total,aes(x=pred_emission_investment_rank,y=percent_change_emissions,color="Actual"))
+gg<-gg+geom_point(alpha=.5,size=.5)
+gg<-gg+geom_point(aes(x=pred_emission_investment_rank,y=pred_emission_investment,color="Predicted"))
+gg<-gg+theme(legend.position="bottom")
+gg<-gg+xlab("State by Rank")+ylab("Percent Change CO2 Emissions")
+gg
 ```
 In comparing states with emission cap laws versus those without, it was found that states with a cap law averaged a 3 percent decrease of CO2 emissions from 1980 to 2014 while states without a cap law averaged a 63 percent increase in CO2 emissions during that time. While this shows a marked difference between states with and without an emissions cap law, the rmse was 125.8, meaning that the accuracy of this prediction is not very reliable. It should also be noted that 14 states have an emission cap law and 32 do not, meaning that part of the unreliability could be a consequence of the uneven distribution between the binary variable. In other words, there can be increased variability of percent change emissions of states with an emissions law because there are only 14 data points. 
 
