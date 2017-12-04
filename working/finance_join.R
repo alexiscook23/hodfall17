@@ -1,8 +1,5 @@
 library(tidyquant)
 
-qkey<-readLines("quandl_key.txt",warn = FALSE)
-quandl_api_key(qkey)
-
 symbols<-c("GOOG","IBM")
 
 full_df<-NULL #Initialize empty dataset
@@ -10,12 +7,22 @@ full_df<-NULL #Initialize empty dataset
 for (symbol in symbols){
 
   # pull financials
-financial<-tq_get("SF1/IBM_GP_MRQ",
+financial<-tq_get(symbol,
                   from="2001-01-01",
-                  get="quandl")
+                  get="financials")
 
 # pull prices
 stock_price<-tq_get(symbol,get="stock.prices")
+
+ratios<-tq_get(symbol,get="key.ratios")%>%
+filter(section == "Cash Flow") %>%
+  select(mo)
+  unnest()
+
+
+stock_price<-stock_price%>%tq_transmute(select=close,
+                                        mutate_fun = to.period,
+                                        period="months")
 
 # add name
 stock_price$name<-symbol
@@ -26,9 +33,6 @@ stock_price$year<-year(stock_price$date)
 stock_price$month<-month(stock_price$date)
 stock_price$day<-day(stock_price$date)
 
-#Convert to average for the month, for merge with quarterly data
-stock_price<-stock_price%>%group_by(name,year,month)%>%
-  summarize_at(c("open","high","low","close","volume"),mean,na.rm=TRUE)
 
 # Get income statements (IS) others are Balance Sheets (bs) and cash flows (CF)
 fin_IS<-financial %>%
@@ -49,7 +53,11 @@ fin_CF<-financial%>%
 # combine all financials
 fin<-rbind(fin_IS,fin_BS,fin_CF)
 
-fin<-fin%>%spread(category,value)
+fin<-fin%>%spread(category,value)%>%
+  select(`date`,
+          `Revenue`,
+         `Operating Income`,
+         `Gross Profit`)
 
 #add name of stock
 fin$name<-symbol
