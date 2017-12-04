@@ -134,7 +134,7 @@ rmse_invest<-rmse(coal_laws_total$percent_change_emissions,coal_laws_total$pred_
 rmse_invest
 ```
 The take-away from this graph is that the conditional mean of investment in renewable energy by state is a mediocre predictor of percent change in CO2 emissions and certainly has room for improvement. The rmse was 124.8. While there does seem to be a connection between the amount that a state invests in renewable energy sources and their reduction of CO2 emissions over time, the connection is certainly not pronounced. The outlier of Louisiana was again dropped to increase the accuracy of the model.  
-
+ 
 #How does the presence of a law capping CO2 emissions affect actual CO2 emissions?
 ```{r}
 #Conditional mean of emission cap versus no emission cap 
