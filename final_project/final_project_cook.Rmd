@@ -149,12 +149,12 @@ rmse_cap
 
 table(coal_laws_total$emission_cap) #how many states have the law versus don't
 
-#scatterplot of conditional mean of investment rank
-gg<-ggplot(data=coal_laws_total,aes(x=pred_emission_investment_rank,y=percent_change_emissions,color="Actual"))
+#scatterplot of conditional mean of cap law
+gg<-ggplot(data=coal_laws_total,aes(x=pred_cap,y=percent_change_emissions))
 gg<-gg+geom_point(alpha=.5,size=.5)
-gg<-gg+geom_point(aes(x=pred_emission_investment_rank,y=pred_emission_investment,color="Predicted"))
-gg<-gg+theme(legend.position="bottom")
-gg<-gg+xlab("State by Rank")+ylab("Percent Change CO2 Emissions")
+gg<-gg+geom_point(aes(x=pred_cap,y=percent_change_emissions))
+gg<-gg+coord_flip()
+gg<-gg+xlab("Mean Percent Change CO2 Emission")+ylab("Actual Percent Change CO2 Emissions")
 gg
 ```
 In comparing states with emission cap laws versus those without, it was found that states with a cap law averaged a 3 percent decrease of CO2 emissions from 1980 to 2014 while states without a cap law averaged a 63 percent increase in CO2 emissions during that time. While this shows a marked difference between states with and without an emissions cap law, the rmse was 125.8, meaning that the accuracy of this prediction is not very reliable. It should also be noted that 14 states have an emission cap law and 32 do not, meaning that part of the unreliability could be a consequence of the uneven distribution between the binary variable. In other words, there can be increased variability of percent change emissions of states with an emissions law because there are only 14 data points. 
@@ -191,13 +191,11 @@ coal_laws_total<-coal_laws_total%>%
             .funs=(as.numeric))
 
 
-#scatterplot of actual percent change emissions versus predicted percent change emissions from the regression
-#I'm commenting this out for now because it's ugly and the relationship is odd (seems like increased investment in renewable energy leads to increased predicted CO2 emissions)
-#g2<-ggplot(coal_laws_total, aes(x=renewable_investment,y=pred,label=abbreviation))
-#g2<-g2+geom_point(shape=1)
-#g2<-g2+geom_text(size=3)
-#g2<-g2+xlab("Renewable Investment")+ylab("Predicted CO2 Emissions in 2014")
-#g2
+#scatterplot of predicted percent change emissions by GDP in 2014
+g2<-ggplot(coal_laws_total, aes(x=log(gdp2014),y=pred,label=abbreviation))
+g2<-g2+geom_text(size=3)
+g2<-g2+xlab("GDP 2014")+ylab("Predicted CO2 Emissions in 2014")
+g2
 ```
 
 
