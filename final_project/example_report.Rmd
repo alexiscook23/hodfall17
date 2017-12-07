@@ -1,8 +1,9 @@
 ---
 title: "What Predicts Family Spending on Groceries?"
 output:
-  html_document: default
+  word_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -71,7 +72,7 @@ groc_75<-cex%>%summarize(quantile(grocery_food,probs=.75))
 `r  `
 
 As the figure shows, 50 percent of families spend more than
-`r prettyNum(round(groc_med[1,1],0),big.mark=",")` 
+`r prettyNum(round(groc_med[1,1],0),big.mark=",")`
 dollars, while 25 percent of families spend more than `r prettyNum(round(groc_75[1,1],0),big.mark=",")`. The question for us is: what characteristics of families predict higher or lower levels of spending? 
 
 ## Which families spend more or less on groceries? 
