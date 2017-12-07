@@ -113,7 +113,7 @@ The mean change in CO2 emission by state during this time was 280.39% increase, 
 
 #How does level of investment in renewable energy affect CO2 emission by state?
 ```{r}
-##Condtional Average of percent change in co2 emissions based on 4 levels of investment in renewable energy by state
+##Condtional Average of percent change in co2 emissions based on 4 levels of investment in renewable energy by state 
 ## Create a variable for quartiles of investment in renewable energy
 coal_laws_adj<-coal_laws_adj%>%mutate(investment_level=ntile(renewable_investment,4))
 
