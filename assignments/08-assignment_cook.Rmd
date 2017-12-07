@@ -145,3 +145,7 @@ auc(logit_roc)
 plot(logit_roc)
 ```
 9. (optional) submit your predictions from the testing dataset as a late submission to Kaggle and see how you do against real-wolrd competition. 
+
+## COMMENTS from WD
+
+## Good, nice work!

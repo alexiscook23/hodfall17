@@ -260,3 +260,9 @@ zip_df_un<-left_join(zip_df_un,county_job,by="zip")
 mod1<-lm(uninsured~college_educ+income_75+county_empl,data=zip_df_un);summary(mod1)
 
 ```
+
+
+## COMMENTS from WD
+
+## Basic idea is right, but you needed to calculate proportions in the
+## last step, doesn't look like that's what happened.
