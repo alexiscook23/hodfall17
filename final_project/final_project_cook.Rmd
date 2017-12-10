@@ -1,8 +1,8 @@
 ---
 output:
-  word_document: default
   pdf_document: default
   html_document: default
+  word_document: default
 ---
 
 ```{r  include=FALSE}
@@ -64,7 +64,7 @@ coal_laws_total<-coal_laws_total%>%
 
 #create separate, adjusted dataset without LA or AR
 coal_laws_adj<-coal_laws_total[-(c(4,16)),]
-View(coal_laws_adj)
+#View(coal_laws_adj)
 
 ```
 ##Goal: 
@@ -277,7 +277,7 @@ The cross-validation of models, when ran 1000 times at 20% testing data, gives a
 
 #change the data to show TX with an emission cap
 coal_laws_total[40,3]=1
-View(coal_laws_total)
+#View(coal_laws_total)
 
 #run regression with this changed value
 mod<-lm(emissions2014~ 
