@@ -4,14 +4,6 @@ output:
   pdf_document: default
   html_document: default
 ---
-   
-1. A strong (A) data analysis will use at least two of the four algorithms (conditional means, regression, logistic regression, k-means clustering) that we discussed in class. The data analysis will include a measure of model fit and will describe which characeristics are closely related to the outcome. The analysis will include cross-validation, which will be correctly exectued and described. 
-
-2. A strong (A) final project will include nicely labeled, easy to understand graphics that describe exactly what is happening with the patterns in the data. The graphics will be complex, showing lots of numbers. The response could include (but doesn't have to include) interactive graphics. 
-
-3. A strong (A) final project will include a 1500-2000 word description that is easily understandable by an interested layperson. Assume that your audience is your boss-- not me. It will be much easier to write this if you have a perspective. 
-
-A strong (A) paper will have code that can generate results from the raw data in an easy to understand way. The code will be commented and will run on my computer without me having to tweak it in any way. (Easy test is to knit the document, with all related files in same directory)
 
 ```{r  include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,warning=FALSE,results ='hide',include=TRUE)
@@ -33,7 +25,6 @@ download.file("https://www.eia.gov/environment/emissions/state/excel/coal_CO2_by
 coal_co2<-read_excel("coal_co2.xlsx")
 
 ## Create a rank variable for percent change (excluding unnecessary rows and all columns that aren't percent change)
-
 coal_co2_slim<-coal_co2[-(c(1,2,9,11,14,42,54:58)),-(c(2:35))]
 coal_co2_slim<-coal_co2_slim%>%mutate(X__36=as.character(X__36))
 coal_co2_slim<-coal_co2_slim%>%mutate(X__36=as.numeric(X__36))
@@ -47,6 +38,7 @@ coal_co2_slim<-coal_co2_slim%>%mutate(percent_change_emissions=percent_change_em
 #open csv file I created that has: abbreviation of state name, binary for co2 emission cap laws by state, and investment in renewable energy by state (in USD)
 cap_laws<-read_csv(file="emission_caps.csv")
 
+#make new column names
 colnames(cap_laws)<-c("state","abbreviation","emission_cap","renewable_investment","gdp2014","pop2014","publicrides2013")
 cap_laws<-cap_laws[-(c(1)), ]
 
@@ -68,9 +60,9 @@ coal_laws_total<-coal_laws_total%>%
                     "publicrides2013"),
             .funs=(as.numeric))
 
-View(coal_laws_total)
+#View(coal_laws_total)
 
-#create adjusted dataset without LA or AR
+#create separate, adjusted dataset without LA or AR
 coal_laws_adj<-coal_laws_total[-(c(4,16)),]
 View(coal_laws_adj)
 
@@ -102,7 +94,7 @@ percent_change_emissions<-coal_laws_total$percent_change_emissions
 mean(percent_change_emissions)
 median(percent_change_emissions)
 
-#adjusted from outliers
+#mean and median adjusted from outliers
 percent_change_emissions<-coal_laws_adj$percent_change_emissions
 mean(percent_change_emissions)
 median(percent_change_emissions)
@@ -165,7 +157,7 @@ With the outliers of LA and AR, the rmse of the conditional mean was 1553.11, me
  
 #How does the presence of a law capping CO2 emissions affect actual CO2 emissions?
 ```{r}
-#Conditional mean of emission cap versus no emission cap 
+#Conditional mean of emission cap versus no emission cap without outliers
 coal_laws_adj%>%group_by(emission_cap)%>%summarize(mean(percent_change_emissions))
 
 coal_laws_adj<-coal_laws_adj%>%group_by(emission_cap)%>%
@@ -177,7 +169,7 @@ rmse_small
 
 table(coal_laws_adj$emission_cap) #how many states have the law versus don't
 
-#Conditional mean of emission cap versus no emission cap 
+#Conditional mean of emission cap versus no emission cap with outliers
 coal_laws_total%>%group_by(emission_cap)%>%summarize(mean(percent_change_emissions))
 
 coal_laws_total<-coal_laws_total%>%group_by(emission_cap)%>%
@@ -189,7 +181,7 @@ rmse_cap
 
 table(coal_laws_adj$emission_cap) #how many states have the law versus don't
 
-#scatterplot of conditional mean of cap law
+#scatterplot of conditional mean of cap law without outliers
 gg<-ggplot(data=coal_laws_adj,aes(x=pred_cap,y=percent_change_emissions))
 gg<-gg+geom_point(alpha=.5,size=.5)
 gg<-gg+geom_point(aes(x=pred_cap,y=percent_change_emissions))
@@ -204,7 +196,7 @@ When including the outliers of LA and AR, the mean percent change of states with
 ##Predictive Model of CO2 Emissions
 ```{r}
 #regression of 2014 emissions by state based on that state's investment in renewable energy and the existence of legal state-wide co2 emission caps
-#make this the actual value as opposed to change and put gdp and population as variables 
+#make this the actual value as opposed to change and put gdp and population as control variables
 mod<-lm(emissions2014~ 
            renewable_investment+
            gdp2014+
@@ -240,16 +232,17 @@ g2<-g2+geom_text(size=3)
 g2<-g2+xlab("GDP 2014")+ylab("Predicted CO2 Emissions in 2014")
 g2
 ```
-The above graph depicts CO2 emissions predicted from the regression model in terms of GDP from 2014. Each data point is shown as the abbreviation of the correlated state. The relationship shows that GDP and predicted CO2 emissions are positively correlated, meaning that increased GDP increases CO2 emissions, a known relationship. There also appears to be two distinguishable lines with the same positive relationship between GDP and predicted emissions; the trend of 12 states that is noticeably below the other trend of upward-sloping states is the states that have emission cap laws. In other words, the states with an emission cap law show the same trend of increased GDP increasing predicted emissions, but their emissions are at lower levels than states without an emission cap law. This is with the exception of Florida and California, both of which have emission cap laws and are in the upper trend of states. 
+The above graph depicts CO2 emissions predicted from the regression model in terms of GDP from 2014. Each data point is shown as the abbreviation of the correlated state. The relationship shows that GDP and predicted CO2 emissions are positively correlated, meaning that states with higher GDP generally have higher CO2 emissions, a known relationship. There also appears to be two distinguishable lines with the same positive relationship between GDP and predicted emissions; the group of 12 states that is noticeably below the other trend of upward-sloping states is the states that have emission cap laws. In other words, the states with an emission cap law show the same trend of increased GDP increasing predicted emissions, but their total emissions are at lower levels than states without an emission cap law. This is with the exception of Florida and California, both of which have emission cap laws and are in the upper group of states. 
 
 #Cross Validation of models
 ```{r}
+#create new dataset where everything is numeric
 coal_laws_total_cv<-coal_laws_total%>%
       dplyr::select(emission_cap,renewable_investment,gdp2014,pop2014,publicrides2013,emissions2014,percent_change_emissions)%>%
        mutate_all(funs(as.numeric))%>%tbl_df()
 
 #View(coal_laws_total_cv)
-
+#run a cross validation 1000 times with 20% of data testing each time
 coal_laws_total_cv<-coal_laws_total_cv%>%
   crossv_mc(n=1000,test=.2)
 coal_laws_total_cv
@@ -312,7 +305,7 @@ mod<-lm(emissions2014~
 summary(mod)
 coal_laws_total<-coal_laws_total%>%add_predictions(mod)
 
-#change the data to show TX with increase in renewable energy
+#change the data to show TX with increase in public transportation use
 coal_laws_total[40,4]=311337270
 coal_laws_total[40,7]=348479
 
@@ -328,10 +321,10 @@ summary(mod)
 coal_laws_total<-coal_laws_total%>%add_predictions(mod)
 
 ```
-In 2014, Texas had the highest CO2 emissions with 149.8 million metric tons. To put the various potential interventions to the test, the data was changed separately to show Texas with an emission cap law, with a 20% increase in renewable energy investment, and with a 20% increase in annual public rides to compare these three scenarios with each other and with the actual data. When the regression is run on the actual data, in which TX does not have an emission cap law, has invested $311,337,270 total in renewable energy since 2002, and had 290,399 rides on public transportation in 2013, the regression predicted that TX would emit 91.55 million metric tons.
+In 2014, Texas had the highest CO2 emissions: 149.8 million metric tons. To put the various potential interventions to the test, the data was changed separately to show Texas with an emission cap law, with a 20% increase in renewable energy investment, and with a 20% increase in annual public rides to compare these three scenarios with each other and with the actual data. When the regression is run on the actual data, in which TX does not have an emission cap law, has invested $311,337,270 total in renewable energy since 2002, and had 290,399 rides on public transportation in 2013, the regression predicted that TX would emit 91.55 million metric tons.
 
-When TX theoretically had an emission cap law, the predicted CO2 emissions from the regression are 74.34. In other words, the regression model predicts that Texas implementing an emission cap law would reduce annual CO2 emissions by 17.21 million metric tons, or almost 19% of their current emissions. When TX theoretically increased its total investment in renewable energy by 20%, which would be a total investment of 373,604,724, the predicted CO2 emissions for that year are 92.95 million metric tons, which is actually more than the actual predicted emissions of Texas. When TX theoretically increased its annual rides on public transportation by 20%, the regression predicted 90.83 million metric tons would be emitted that year, which is a decrease of .72 million metric tons. Clearly, the regression predicts that the most effective way to dramatically reduce CO2 emissions in Texas would be to enact an emission cap law. Other forms of investment are more expensive and only nominally reduce emissions, or may even increase emissions.
+When TX theoretically had an emission cap law, the predicted CO2 emissions from the regression are 74.34 million metric tons. In other words, the regression model predicts that Texas implementing an emission cap law would reduce annual CO2 emissions by 17.21 million metric tons, or almost 19% of their current emissions. When TX theoretically increased its total investment in renewable energy by 20%, which would be a total investment of 373,604,724, the predicted CO2 emissions for that year are 92.95 million metric tons, which is actually more than the actual predicted emissions of Texas. When TX theoretically increased its annual rides on public transportation by 20%, the regression predicted 90.83 million metric tons would be emitted that year, which is a decrease of .72 million metric tons. Clearly, the regression predicts that the most effective way to dramatically reduce CO2 emissions in Texas would be to enact an emission cap law. Other forms of investment are more expensive and only nominally reduce emissions, or may even increase emissions.
 
 #Take-aways 
-Overall, it seems that emission cap laws have a more significant impact on CO2 emissions by state than investments in renewable energy or the use of public transportation. The models included state GDP and population to control for these variables, since they are known to be highly correlated to total CO2 emission by state. The outliers of Louisiana and Arkansas show the extreme effects that increased industry can have on CO2 emissions in a state, although the fact that the percent change variables are outliers and the total emissions in 2014 of the two states are not outliers implies that these massive changes are actually still comparable to what other states were already annually emitting in CO2. Under the assumption that the goal is to minimize CO2 emissions, government agencies should invest their time and energy into enacting an emission cap law in the state, or improving the rigor of the law if it already has one in place, instead of investing in renewable energy or public transportation. While the emission cap law has a statistically significant negative relationship to CO2 emissions, it is still contested in some states based on the burden it places on corporations and industries. Theoretically, enacting an emission cap law would be free for the state government; however, the true cost would be the loss of industry on the side of the corporations. This loss could be mitigated through new, cleaner technologies and cap and trade techniques that allow CO2-heavy industries to "trade" for their increased emissions. On the other hand, increasing government investment in renewable energy or improving public transportation is more costly and not as strongly correlated to CO2 emission reduction. Therefore, the state legislators should enact an emission cap law and allow for cap and trade to ease some of the burden on industries. 
+Overall, it seems that emission cap laws have a more significant impact on CO2 emissions by state than investments in renewable energy or the use of public transportation. The models included state GDP and population to control for these variables, since they are known to be highly correlated to total CO2 emission by state. The outliers of Louisiana and Arkansas show the extreme effects that increased industry can have on CO2 emissions in a state, although the fact that the percent change variables are outliers and the total emissions in 2014 of the two states are not outliers implies that these massive changes are actually still comparable to what other states were already annually emitting in CO2. Under the assumption that the goal is to minimize CO2 emissions, government agencies should invest their time and energy into enacting an emission cap law in the state, or improving the rigor of the law if it already has one in place, instead of investing in renewable energy or public transportation. While the emission cap law has a statistically significant negative relationship to CO2 emissions, it is still contested in some states based on the burden it places on corporations and industries. Theoretically, enacting an emission cap law would be free for the state government; however, the true cost would be the loss of industry on the side of the corporations. This loss could be mitigated through new, cleaner technologies and cap and trade techniques that allow CO2-heavy industries to "trade" for their increased emissions. Other CO2 reduction options like increasing government investment in renewable energy or increasing public transportation are more costly and not as strongly correlated to CO2 emission reduction. Therefore, the state legislators should enact or strengthen an emission cap law and allow for cap and trade to ease some of the burden on industries. 
 
