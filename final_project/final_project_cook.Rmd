@@ -1,8 +1,8 @@
 ---
 output:
+  word_document: default
   pdf_document: default
   html_document: default
-  word_document: default
 ---
 
 ```{r  include=FALSE}
@@ -207,7 +207,7 @@ mod<-lm(emissions2014~
 summary(mod)
 
 #create a variable of the predictions of the regression
-coal_laws_total<-coal_laws_total%>%add_predictions(mod)
+coal_laws_total<-coal_laws_total%>%modelr::add_predictions(mod)
 ```
 ##Accuracy of the model
 ```{r}
@@ -244,7 +244,7 @@ coal_laws_total_cv<-coal_laws_total%>%
 #View(coal_laws_total_cv)
 #run a cross validation 1000 times with 20% of data testing each time
 coal_laws_total_cv<-coal_laws_total_cv%>%
-  crossv_mc(n=1000,test=.2)
+  modelr::crossv_mc(n=1000,test=.2)
 coal_laws_total_cv
 
 mod1_formula<-formula("emissions2014~
@@ -288,7 +288,7 @@ mod<-lm(emissions2014~
          emission_cap,
          data=coal_laws_total,na.action="na.exclude")
 summary(mod)
-coal_laws_total<-coal_laws_total%>%add_predictions(mod)
+coal_laws_total<-coal_laws_total%>%modelr::add_predictions(mod)
 
 #change the data to show TX with increase in renewable energy
 coal_laws_total[40,3]=0
@@ -303,7 +303,7 @@ mod<-lm(emissions2014~
          emission_cap,
          data=coal_laws_total,na.action="na.exclude")
 summary(mod)
-coal_laws_total<-coal_laws_total%>%add_predictions(mod)
+coal_laws_total<-coal_laws_total%>%modelr::add_predictions(mod)
 
 #change the data to show TX with increase in public transportation use
 coal_laws_total[40,4]=311337270
@@ -318,7 +318,7 @@ mod<-lm(emissions2014~
          emission_cap,
          data=coal_laws_total,na.action="na.exclude")
 summary(mod)
-coal_laws_total<-coal_laws_total%>%add_predictions(mod)
+coal_laws_total<-coal_laws_total%>%modelr::add_predictions(mod)
 
 ```
 In 2014, Texas had the highest CO2 emissions: 149.8 million metric tons. To put the various potential interventions to the test, the data was changed separately to show Texas with an emission cap law, with a 20% increase in renewable energy investment, and with a 20% increase in annual public rides to compare these three scenarios with each other and with the actual data. When the regression is run on the actual data, in which TX does not have an emission cap law, has invested $311,337,270 total in renewable energy since 2002, and had 290,399 rides on public transportation in 2013, the regression predicted that TX would emit 91.55 million metric tons.
