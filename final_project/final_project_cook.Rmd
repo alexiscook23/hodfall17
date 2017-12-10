@@ -1,8 +1,8 @@
 ---
 output:
+  word_document: default
   pdf_document: default
   html_document: default
-  word_document: default
 ---
 
 ```{r  include=FALSE}
@@ -217,6 +217,7 @@ rmse<-with(coal_laws_total,rmse(emissions2014,pred));rmse
 
 A regression model predicting the emissions of CO2 by state in 2014 is much more accurate than the conditional means, based on its rmse of 26.62. However, it's important to note that this model used actual emissions, in million metric tons of CO2, rather than using percent change in CO2, because it increased the accuracy of the model. This means that the rmse should be interpretted differently; the 26.62 rmse means that the model is accurate in predicting emissions in 2014 within 26.62 million metric tons above or below actual emissions. Total variance between states in emissions in 2014 is 149.8, meaning that the rmse of 26.62 is .18 of total variance, which is  only slightly more accurate than the .21 proportion of rmse:variance in the conditional means. Additionally, because the model uses emissions in 2014 instead of percent change of emissions, the regression included LA and AR; while their percent change from 1980-2014 was dramatically higher than the other states, their total emissions in 2014 are not outliers. The regression included whether or not states had an emission cap law, the amount spent on renewable energy, the total amount of unlinked rides using public transportation in 2013, the population in 2014, and the GDP in 2014. Population and GDP were included as controls because they are factors known to influence CO2 emission rates. The emission cap law is statistically significant, based on the p-value of .0033; the other factors are not statistically significant. Emission caps have a negative correlation to emissions, meaning states with an emission cap are predicted to have lower emissions in 2014. The r-squared value is .39, meaning that this model accounts for 39% of the variance within CO2 emissions among states. 
 
+##Predicted Change in CO2 Emissions by GDP in 2014
 ```{r}
 coal_laws_total<-coal_laws_total%>%
   mutate_at(.vars=c("investment_level",
@@ -234,7 +235,7 @@ g2
 ```
 The above graph depicts CO2 emissions predicted from the regression model in terms of GDP from 2014. Each data point is shown as the abbreviation of the correlated state. The relationship shows that GDP and predicted CO2 emissions are positively correlated, meaning that states with higher GDP generally have higher CO2 emissions, a known relationship. There also appears to be two distinguishable lines with the same positive relationship between GDP and predicted emissions; the group of 12 states that is noticeably below the other trend of upward-sloping states is the states that have emission cap laws. In other words, the states with an emission cap law show the same trend of increased GDP increasing predicted emissions, but their total emissions are at lower levels than states without an emission cap law. This is with the exception of Florida and California, both of which have emission cap laws and are in the upper group of states. 
 
-#Cross Validation of models
+#Cross Validation of Models
 ```{r}
 #create new dataset where everything is numeric
 coal_laws_total_cv<-coal_laws_total%>%
