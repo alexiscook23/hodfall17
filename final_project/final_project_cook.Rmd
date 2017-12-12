@@ -1,12 +1,12 @@
 ---
 output:
-  word_document: default
-  pdf_document: default
   html_document: default
+  pdf_document: default
+  word_document: default
 ---
 
 ```{r  include=FALSE}
-knitr::opts_chunk$set(echo = FALSE,warning=FALSE,results ='hide',include=TRUE)
+knitr::opts_chunk$set(echo = FALSE,warning=FALSE,results ='hide',include=TRUE,message=FALSE)
 library(tidyverse)
 library(plotly)
 library(gridExtra)
@@ -86,6 +86,13 @@ p <- plot_ly(coal_laws_adj, x = ~percent_change_rank, y = ~percent_change_emissi
          yaxis = list(title = "Percent Change in CO2 Emissions (1980-2014)"))
 p
 
+```
+```{r}
+#this is just a graph to show on the html since the interactive graph won't show up when the file is knit
+gg<-ggplot(coal_laws_adj,aes(x=percent_change_rank,y=percent_change_emissions,type='bar',text=state))
+gg<-gg+geom_bar(stat="identity")
+gg<-gg+xlab("States by Rank")+ylab("Percent Change in CO2 Emissions (1980-2014")
+gg
 
 ```
 
@@ -209,9 +216,8 @@ summary(mod)
 #create a variable of the predictions of the regression
 coal_laws_total<-coal_laws_total%>%modelr::add_predictions(mod)
 ```
-##Accuracy of the model
 ```{r}
-#rmse of model
+#rmse of model\
 rmse<-with(coal_laws_total,rmse(emissions2014,pred));rmse
 ```
 
@@ -320,6 +326,17 @@ mod<-lm(emissions2014~
          data=coal_laws_total,na.action="na.exclude")
 summary(mod)
 coal_laws_total<-coal_laws_total%>%modelr::add_predictions(mod)
+
+#have a graphic that has the variables you changed on the y axis and the amount it changed on the x axis just to show via bar graph how much it changed
+```
+```{r}
+ df_1<-c(17.21,-1.4,.72) 
+ df_2<-c("Emissions Cap Law","Renewable Energy","Public Transportation") 
+ foo<-tbl_df(data.frame(df_1,df_2)) 
+ gg<-ggplot(foo,aes(y=df_1,x=as.factor(df_2))) 
+gg<-gg+geom_bar(stat="identity")
+gg<-gg+xlab("Predicted Decrease in CO2 Emissions")+ylab("Intervention")
+gg
 
 ```
 In 2014, Texas had the highest CO2 emissions: 149.8 million metric tons. To put the various potential interventions to the test, the data was changed separately to show Texas with an emission cap law, with a 20% increase in renewable energy investment, and with a 20% increase in annual public rides to compare these three scenarios with each other and with the actual data. When the regression is run on the actual data, in which TX does not have an emission cap law, has invested $311,337,270 total in renewable energy since 2002, and had 290,399 rides on public transportation in 2013, the regression predicted that TX would emit 91.55 million metric tons.
